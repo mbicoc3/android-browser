@@ -9,7 +9,7 @@ import com.example.core.network.DohProvider
  * Change this constant to manually update the default Start Page wallpaper image.
  */
 const val DEFAULT_START_WALLPAPER_URL =
-    "https://i.pinimg.com/736x/7e/1e/4c/7e1e4c627483b2565286641d9a53f14b.jpg"
+    "https://i.pinimg.com/736x/93/a8/98/93a898a6df83dca9e3e3e1d9ec19f666.jpg"
 
 enum class AppThemeMode(val displayName: String) {
     LIGHT("Light"),
