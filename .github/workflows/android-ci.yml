@@ -45,14 +45,15 @@ jobs:
   rust-adblock-check:
     name: Check Native adblock-rust Crate
     runs-on: ubuntu-latest
-    if: hashFiles('native/adblock-rust/Cargo.toml') != ''
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Rust toolchain
+        if: hashFiles('native/adblock-rust/Cargo.toml') != ''
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cargo Check
+        if: hashFiles('native/adblock-rust/Cargo.toml') != ''
         working-directory: native/adblock-rust
         run: cargo check --locked || cargo check
