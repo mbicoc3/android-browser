@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Orbit</string>
+    <string name="tagline">Fast · Modular · Private</string>
+
+    <!-- Omnibox & Navigation -->
+    <string name="omnibox_placeholder">Search or enter web address</string>
+    <string name="action_back">Back</string>
+    <string name="action_forward">Forward</string>
+    <string name="action_reload">Reload</string>
+    <string name="action_stop">Stop loading</string>
+    <string name="action_home">Start page</string>
+    <string name="action_tabs">Open tabs</string>
+    <string name="action_tools">Browser tools</string>
+    <string name="action_bookmark">Bookmark page</string>
+    <string name="action_close">Close</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_add">Add</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_open">Open</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+
+    <!-- Start Page -->
+    <string name="start_greeting">Explore without clutter</string>
+    <string name="start_subtitle">Modular Android Web Engine</string>
+    <string name="section_speed_dial">Speed Dial</string>
+    <string name="section_registered_tools">Browser Tools</string>
+    <string name="incognito_banner">Incognito Mode · History &amp; cookies are not saved</string>
+
+    <!-- Tabs -->
+    <string name="tabs_title">Tabs</string>
+    <string name="tabs_new">New Tab</string>
+    <string name="tabs_new_incognito">Incognito</string>
+    <string name="tabs_close_all">Close All</string>
+    <string name="tabs_standard_section">Standard Tabs</string>
+    <string name="tabs_incognito_section">Private Tabs</string>
+    <string name="tabs_empty_title">No open tabs</string>
+    <string name="tabs_empty_subtitle">Start a new browsing session or open a private tab.</string>
+    <string name="tabs_view_card">Card View</string>
+    <string name="tabs_view_list">List View</string>
+    <string name="tabs_previews_on">Previews On</string>
+    <string name="tabs_previews_off">Previews Off</string>
+    <string name="tabs_badge_private">Private</string>
+    <string name="tabs_badge_active">Active</string>
+    <string name="tabs_default_title">Start Page</string>
+    <string name="tabs_start_host">orbit://start</string>
+
+    <!-- Bookmarks -->
+    <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_search">Filter bookmarks</string>
+    <string name="bookmarks_add">Add Bookmark</string>
+    <string name="bookmarks_empty_title">No saved bookmarks yet</string>
+    <string name="bookmarks_empty_subtitle">Tap the star icon while browsing to save pages locally in Room.</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_search">Search history</string>
+    <string name="history_clear_all">Clear All</string>
+    <string name="history_empty_title">Browsing history is clear</string>
+    <string name="history_empty_subtitle">Visited pages appear here unless you are browsing in Incognito mode.</string>
+
+    <!-- Downloads -->
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_new">Download URL</string>
+    <string name="downloads_empty_title">No downloads queued</string>
+    <string name="downloads_empty_subtitle">Files downloaded in Orbit accelerate across parallel chunks via WorkManager.</string>
+    <string name="downloads_folder_title">Save Location</string>
+    <string name="downloads_choose_folder">Choose Folder</string>
+    <string name="downloads_reset_folder">Reset Default</string>
+    <string name="downloads_settings_title">Download Settings</string>
+    <string name="downloads_confirm_title">Confirm Download</string>
+    <string name="downloads_confirm_start">Start Download</string>
+    <string name="downloads_confirm_toggle">Ask before downloading</string>
+    <string name="downloads_confirm_subtitle">Preview filename, size, folder &amp; chunk speed before saving</string>
+    <string name="downloads_chunks_title">Parallel Chunks (Speed Boost)</string>
+    <string name="downloads_wifi_only">Wi-Fi Only Downloads</string>
+    <string name="downloads_wifi_only_subtitle">Pause or defer downloads on metered cellular data</string>
+    <string name="downloads_clear_finished">Clear Finished</string>
+    <string name="downloads_pause">Pause</string>
+    <string name="downloads_resume">Resume</string>
+    <string name="downloads_share">Share</string>
+
+    <!-- Privacy Vault -->
+    <string name="vault_title">Privacy Vault</string>
+    <string name="vault_subtitle">AES-256-GCM encrypted with Android Keystore</string>
+    <string name="vault_add">New Encrypted Entry</string>
+    <string name="vault_empty_title">Your vault is empty</string>
+    <string name="vault_empty_subtitle">Store sensitive links or private notes encrypted by hardware-backed Android Keystore.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_search_engine">Default Search Engine</string>
+    <string name="settings_privacy">Privacy &amp; Shield</string>
+    <string name="settings_engine">WebView Engine &amp; Display</string>
+    <string name="settings_maintenance">Storage &amp; Background Tasks</string>
+    <string name="settings_run_cleanup">Run Cache Cleanup Now</string>
+
+    <!-- Tools Hub -->
+    <string name="tools_hub_title">Tools &amp; Modules</string>
+    <string name="tools_hub_subtitle">Registered feature modules in Orbit</string>
+
+    <!-- Site Data Manager -->
+    <string name="site_data_title">Site Data Manager</string>
+    <string name="site_data_subtitle">Cookies · Storage · IndexedDB · Cache</string>
+    <string name="site_data_search">Search site domain or origin</string>
+    <string name="site_data_empty_title">No site storage data found</string>
+    <string name="site_data_empty_subtitle">Visit websites in standard mode to inspect and selectively clear Cookies, Local Storage, Session Storage, IndexedDB, or Cache.</string>
+    <string name="site_data_clear_all_site">Clear All Data for Site</string>
+    <string name="site_data_inspect_icon_desc">Inspect site cookies and storage</string>
+
+    <!-- Ad & Tracker Shield -->
+    <string name="shield_title">Ad &amp; Tracker Shield</string>
+    <string name="shield_subtitle">EasyPrivacy · AdGuard · Cosmetic CSS</string>
+
+    <!-- Tools Menu Quick Controls -->
+    <string name="menu_protection_title">Track &amp; Ad Protection</string>
+    <string name="menu_track_ad_blocker">Track Protection &amp; Ad Blocker</string>
+    <string name="menu_track_ad_blocker_on">Blocking trackers &amp; ads (EasyPrivacy, AdGuard)</string>
+    <string name="menu_track_ad_blocker_off">Off · Trackers &amp; ads are allowed</string>
+    <string name="menu_cosmetic_filtering">Cosmetic Ad Hiding</string>
+    <string name="menu_cosmetic_filtering_on">Hiding ad banners &amp; empty slots</string>
+    <string name="menu_cosmetic_filtering_off">Off · Page layout elements untouched</string>
+    <string name="menu_cosmetic_requires_shield">Enable Track &amp; Ad Blocker first</string>
+    <string name="menu_reload_page">Reload</string>
+    <string name="menu_copy_page_url">Copy URL</string>
+    <string name="menu_select_all_page">Select All</string>
+    <string name="menu_copy_selection">Copy Selection</string>
+
+    <!-- Web Context Menu -->
+    <string name="ctx_open_link">Open Link</string>
+    <string name="ctx_open_new_tab">New Tab</string>
+    <string name="ctx_open_incognito">Private</string>
+    <string name="ctx_open_external_app">Open App</string>
+    <string name="ctx_open_image_tab">View Image</string>
+    <string name="ctx_copy_link">Copy Link</string>
+    <string name="ctx_copy_image_link">Copy Image URL</string>
+    <string name="ctx_copy_link_text">Copy Link Text</string>
+    <string name="ctx_select_text">Select Text</string>
+    <string name="ctx_select_text_subtitle">Highlight element text to adjust &amp; copy</string>
+    <string name="ctx_search_text">Search on Web</string>
+    <string name="ctx_save_image">Save Image</string>
+    <string name="ctx_download_link">Download Link</string>
+    <string name="ctx_save_downloads_subtitle">Save via Orbit background downloader</string>
+    <string name="ctx_save_bookmark">Save to Bookmarks</string>
+    <string name="ctx_save_bookmark_subtitle">Store link in Orbit Bookmarks</string>
+    <string name="ctx_pin_to_home">Pin to Home</string>
+    <string name="ctx_pin_to_home_subtitle">Add shortcut to Start Page Speed Dial</string>
+    <string name="ctx_share_link">Share Link</string>
+    <string name="msg_link_copied">Link copied to clipboard</string>
+    <string name="msg_link_text_copied">Link text copied to clipboard</string>
+    <string name="msg_selection_copied">Selected text copied</string>
+    <string name="msg_no_selection">No text selected on page</string>
+    <string name="msg_saved_to_app">Saved to Orbit Bookmarks</string>
+    <string name="msg_no_external_app">No external app found to open this link</string>
+
+    <!-- Multipurpose URL Bar & Direct Image Inspector -->
+    <string name="omnibox_image_badge_desc">Direct image dimensions</string>
+    <string name="omnibox_action_paste_go">Paste &amp; Go</string>
+    <string name="omnibox_action_copy_url">Copy URL</string>
+    <string name="omnibox_action_download">Download</string>
+    <string name="omnibox_action_share">Share</string>
+    <string name="omnibox_action_site_data">Site Data</string>
+    <string name="omnibox_action_find">Find</string>
+    <string name="omnibox_action_desktop">Desktop</string>
+    <string name="omnibox_action_pin">Pin Home</string>
+    <string name="omnibox_action_private">Private Tab</string>
+    <string name="omnibox_quick_actions_title">Quick Actions</string>
+    <string name="omnibox_search_with">Search with</string>
+    <string name="omnibox_result_copied">Result copied to clipboard</string>
+    <string name="omnibox_url_actions_desc">URL bar quick actions</string>
+
+    <!-- Start Page Wallpaper / Background -->
+    <string name="ctx_set_background_image">Set as Background Image</string>
+    <string name="ctx_set_background_subtitle">Save externally &amp; use as Start Page wallpaper</string>
+    <string name="msg_setting_background">Saving background image…</string>
+    <string name="msg_background_updated">Start Page background image updated</string>
+    <string name="msg_background_failed">Failed to set background image</string>
+    <string name="customize_pick_local_image">Gallery</string>
+    <string name="settings_start_bg_section">Start Page Background</string>
+    <string name="wallpaper_adjust_title">Adjust Background</string>
+    <string name="wallpaper_adjust_dummy_ui">Preview UI</string>
+    <string name="wallpaper_adjust_reset">Reset</string>
+    <string name="wallpaper_adjust_save">Apply</string>
+
+    <!-- 3-Dot Page Menu & Offline Pages -->
+    <string name="action_more_options">Page options</string>
+    <string name="more_menu_add_bookmark">Add Bookmark</string>
+    <string name="more_menu_bookmarked">Bookmarked</string>
+    <string name="more_menu_share">Share</string>
+    <string name="more_menu_quick_share">Quick Share</string>
+    <string name="more_menu_quick_share_app">Quick share via %1$s</string>
+    <string name="action_new_tab_or_home">New tab, hold or swipe for home</string>
+    <string name="more_menu_desktop_agent">Desktop Agent</string>
+    <string name="more_menu_add_speed_dial">Add to Speed Dial</string>
+    <string name="more_menu_find_page">Find from this webpage</string>
+    <string name="more_menu_save_offline">Save Page Offline</string>
+    <string name="more_menu_site_data">Site Data &amp; Cookies</string>
+    <string name="offline_pages_title">Offline Pages</string>
+    <string name="offline_pages_subtitle">Saved complete webpages for offline reading</string>
+    <string name="offline_pages_search">Filter offline pages</string>
+    <string name="offline_pages_empty_title">No offline pages saved</string>
+    <string name="offline_pages_empty_subtitle">Open any webpage, tap the top-right 3-dot menu, and choose Save Page Offline to read without internet.</string>
+    <string name="offline_pages_clear_all">Clear All</string>
+    <string name="msg_saving_offline">Saving webpage offline…</string>
+    <string name="msg_saved_offline">Saved for offline reading</string>
+    <string name="msg_save_offline_failed">Could not save this webpage offline</string>
+
+    <!-- Speed Dial Collections & Gestures -->
+    <string name="shortcut_actions_move_to">Move to Collection</string>
+    <string name="shortcut_actions_refresh_icon">Refresh Website Icon</string>
+    <string name="shortcut_collection_empty">Tap + to add shortcuts or long-press any shortcut to move it here.</string>
+    <string name="shortcut_rename_collection">Rename Collection</string>
+    <string name="gestures_title">Quick Touch Gestures</string>
+    <string name="gestures_subtitle">Swipe gestures across Orbit Browser</string>
+
+    <!-- Website Sandboxes -->
+    <string name="sandboxes_title">Sandboxes</string>
+    <string name="sandboxes_new">New Sandbox</string>
+    <string name="sandboxes_search">Filter sandboxes</string>
+    <string name="sandboxes_empty_title">No sandboxes</string>
+    <string name="sandboxes_empty_subtitle">Create isolated sessions per site.</string>
+    <string name="more_menu_sandbox">Open in Sandbox</string>
+    <string name="more_menu_sandbox_active">Sandbox: %1$s</string>
+</resources>

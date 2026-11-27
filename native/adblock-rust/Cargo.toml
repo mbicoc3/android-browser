@@ -1,0 +1,14 @@
+[package]
+name = "orbit_adblock_rust"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "Optional Brave adblock-rust JNI bridge for Orbit Browser"
+
+[lib]
+name = "orbit_adblock_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+adblock = { version = "0.8", default-features = true }
+jni = "0.21"

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Group AndroidX and Jetpack Compose updates weekly",
+      "matchManagers": ["gradle"],
+      "matchPackagePrefixes": ["androidx.", "com.google."],
+      "groupName": "AndroidX & Jetpack",
+      "schedule": ["every weekend"]
+    },
+    {
+      "description": "Group OkHttp, Retrofit, and Moshi updates",
+      "matchManagers": ["gradle"],
+      "matchPackagePrefixes": ["com.squareup."],
+      "groupName": "Square Networking"
+    },
+    {
+      "description": "Track native adblock-rust Cargo dependencies",
+      "matchManagers": ["cargo"],
+      "groupName": "Rust adblock-rust"
+    }
+  ]
+}

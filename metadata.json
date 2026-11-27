@@ -1,0 +1,6 @@
+{
+  "name": "Orbit",
+  "description": "Modular, privacy-focused Android browser built with Kotlin, Jetpack Compose, WebView, AndroidX WebKit, Room, DataStore, Retrofit, WorkManager, and Android Keystore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
