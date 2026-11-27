@@ -1,5 +1,5 @@
 use adblock::engine::Engine;
-use adblock::lists::ParseOptions;
+use adblock::lists::{FilterSet, ParseOptions};
 use adblock::request::Request;
 use jni::objects::{JClass, JString};
 use jni::sys::{jboolean, jlong, jstring, JNI_FALSE, JNI_TRUE};
@@ -16,7 +16,9 @@ pub extern "system" fn Java_com_example_feature_shield_engine_NativeAdblockBridg
         Err(_) => return 0,
     };
     let rules: Vec<String> = input.lines().map(|line| line.to_string()).collect();
-    let engine = Engine::from_rules(&rules, ParseOptions::default());
+    let mut filter_set = FilterSet::new(false);
+    filter_set.add_filters(&rules, ParseOptions::default());
+    let engine = Engine::from_filter_set(filter_set, true);
     Box::into_raw(Box::new(engine)) as jlong
 }
 

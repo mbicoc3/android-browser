@@ -20,19 +20,44 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Prepare Debug Keystore
+        run: |
+          if [ ! -f debug.keystore ] && [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
 
       - name: Run Unit Tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew :app:testDebugUnitTest --no-daemon
+          else
+            gradle :app:testDebugUnitTest --no-daemon
+          fi
 
       - name: Run Android Lint
-        run: ./gradlew :app:lintDebug --no-daemon
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew :app:lintDebug --no-daemon
+          else
+            gradle :app:lintDebug --no-daemon
+          fi
 
       - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew :app:assembleDebug --no-daemon
+          else
+            gradle :app:assembleDebug --no-daemon
+          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -56,4 +81,4 @@ jobs:
       - name: Cargo Check
         if: hashFiles('native/adblock-rust/Cargo.toml') != ''
         working-directory: native/adblock-rust
-        run: cargo check --locked || cargo check
+        run: cargo check

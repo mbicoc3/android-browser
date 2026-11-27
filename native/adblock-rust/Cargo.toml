@@ -10,5 +10,5 @@ name = "orbit_adblock_rust"
 crate-type = ["cdylib"]
 
 [dependencies]
-adblock = { version = "0.8", default-features = true }
+adblock = { version = "0.13", default-features = true }
 jni = "0.21"
