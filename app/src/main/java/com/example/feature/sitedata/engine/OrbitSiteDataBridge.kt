@@ -94,9 +94,9 @@ object OrbitSiteDataBridge {
         pending.remove(requestId)?.cancel()
     }
 
-    fun createJsInterface(): Any = JsReceiver()
+    fun createJsInterface(): JsReceiver = JsReceiver()
 
-    private class JsReceiver {
+    class JsReceiver {
         @JavascriptInterface
         fun onResult(requestId: String?, payloadJson: String?) {
             if (requestId.isNullOrBlank()) return

@@ -1,5 +1,4 @@
 use adblock::engine::Engine;
-use adblock::lists::{FilterSet, ParseOptions};
 use adblock::request::Request;
 use jni::objects::{JClass, JString};
 use jni::sys::{jboolean, jlong, jstring, JNI_FALSE, JNI_TRUE};
@@ -15,10 +14,7 @@ pub extern "system" fn Java_com_example_feature_shield_engine_NativeAdblockBridg
         Ok(s) => s.into(),
         Err(_) => return 0,
     };
-    let rules: Vec<String> = input.lines().map(|line| line.to_string()).collect();
-    let mut filter_set = FilterSet::new(false);
-    filter_set.add_filters(&rules, ParseOptions::default());
-    let engine = Engine::from_filter_set(filter_set, true);
+    let engine = Engine::new_with_list_text(input);
     Box::into_raw(Box::new(engine)) as jlong
 }
 
@@ -42,10 +38,10 @@ pub extern "system" fn Java_com_example_feature_shield_engine_NativeAdblockBridg
     let src_url: String = env.get_string(&source_url).map(Into::into).unwrap_or_default();
     let req_type: String = env.get_string(&request_type).map(Into::into).unwrap_or_else(|_| "other".into());
 
-    match Request::new(&req_url, &src_url, &req_type) {
+    match Request::new(&req_url, &src_url, &req_type, "GET") {
         Ok(request) => {
             let result = engine.check_network_request(&request);
-            if result.matched {
+            if result.filter.is_some() && result.exception.is_none() {
                 JNI_TRUE
             } else {
                 JNI_FALSE
