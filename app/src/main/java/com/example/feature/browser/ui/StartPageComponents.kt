@@ -65,12 +65,15 @@ import coil.compose.AsyncImage
 import com.example.R
 import com.example.core.common.SearchEngine
 import com.example.core.network.FaviconHtmlParser
+import com.example.core.ui.components.OrbitControlTokens
+import com.example.core.ui.components.OrbitSearchPillSurface
 import com.example.core.ui.theme.OrbitCyan
 import com.example.core.ui.theme.OrbitDarkOnSurface
 import com.example.core.ui.theme.OrbitDarkOnSurfaceVariant
 import com.example.core.ui.theme.OrbitDarkOutline
 import com.example.core.ui.theme.OrbitDarkSurface
 import com.example.core.ui.theme.OrbitEmerald
+import com.example.core.ui.theme.OrbitGradientIndigo
 import com.example.core.ui.theme.OrbitIncognitoPurple
 import com.example.core.ui.theme.OrbitLightEmerald
 import com.example.core.ui.theme.OrbitLightOnSurface
@@ -79,6 +82,7 @@ import com.example.core.ui.theme.OrbitLightOutline
 import com.example.core.ui.theme.OrbitLightPrimary
 import com.example.core.ui.theme.OrbitLightSurfaceVariant
 import com.example.core.ui.theme.OrbitSpacing
+import com.example.core.ui.theme.OrbitSpeedDialDarkInk
 import com.example.feature.browser.model.SpeedDialShortcut
 import java.io.File
 
@@ -196,17 +200,15 @@ internal fun FloatingStartSearchPill(
     val defaultBorder = if (isDarkTheme) OrbitDarkOutline else OrbitLightOutline
     val activeAccent = if (isDarkTheme) OrbitCyan else OrbitLightPrimary
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(28.dp),
-        color = pillBackground,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (isFocused) activeAccent else defaultBorder
-        ),
-        shadowElevation = if (isDarkTheme) 6.dp else 2.dp
+    OrbitSearchPillSurface(
+        focused = isFocused,
+        height = OrbitControlTokens.StartSearchHeight,
+        shape = CircleShape,
+        containerColor = pillBackground,
+        borderColor = defaultBorder,
+        focusedBorderColor = activeAccent,
+        shadowElevation = if (isDarkTheme) 6.dp else 2.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -225,9 +227,9 @@ internal fun FloatingStartSearchPill(
                         .background(
                             Brush.linearGradient(
                                 colors = if (isIncognito) {
-                                    listOf(OrbitIncognitoPurple, Color(0xFF6366F1))
+                                    listOf(OrbitIncognitoPurple, OrbitGradientIndigo)
                                 } else {
-                                    listOf(OrbitCyan, Color(0xFF6366F1), OrbitEmerald)
+                                    listOf(OrbitCyan, OrbitGradientIndigo, OrbitEmerald)
                                 }
                             )
                         ),
@@ -362,7 +364,7 @@ internal fun SpeedDialTile(
                     contentAlignment = Alignment.Center
                 ) {
                     val letterColor = if (shortcut.accentColor.luminance() > 0.6f) {
-                        Color(0xFF0F172A)
+                        OrbitSpeedDialDarkInk
                     } else {
                         Color.White
                     }

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +41,7 @@ import com.example.core.ui.components.OrbitSectionHeader
 import com.example.core.ui.components.OrbitSegmentPill
 import com.example.core.ui.components.OrbitSettingSwitchRow
 import com.example.core.ui.components.OrbitSurfaceCard
+import com.example.core.ui.components.OrbitSwitch
 import com.example.core.ui.components.OrbitTextField
 import com.example.core.ui.theme.OrbitSpacing
 import com.example.feature.passwords.crypto.VaultBiometricKeystoreHelper
@@ -82,14 +82,9 @@ fun VaultSettingsTab(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text("Phone Lock & Biometrics", style = MaterialTheme.typography.titleMedium)
-                                Text(
-                                    "Unlock with Fingerprint, Face, PIN, Pattern, or Password",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
-                        Switch(
+                        OrbitSwitch(
                             checked = settings.biometricEnabled,
                             onCheckedChange = { enabled ->
                                 if (!enabled) {
@@ -124,7 +119,6 @@ fun VaultSettingsTab(
         item {
             OrbitSettingSwitchRow(
                 title = "Lock on App Background",
-                subtitle = "Automatically lock decrypted vault & clear memory when leaving Orbit",
                 icon = Icons.Rounded.Lock,
                 checked = settings.lockOnBackground,
                 onCheckedChange = { checked -> viewModel.updateSecurityPolicies(lockOnBackground = checked) },
@@ -135,7 +129,6 @@ fun VaultSettingsTab(
         item {
             OrbitSettingSwitchRow(
                 title = "Allow Autofill on HTTP Sites",
-                subtitle = "Keep OFF to block password autofill on unencrypted http:// pages",
                 icon = Icons.Rounded.Warning,
                 checked = settings.allowHttpAutofill,
                 onCheckedChange = { checked -> viewModel.updateSecurityPolicies(allowHttpAutofill = checked) },

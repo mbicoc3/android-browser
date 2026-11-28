@@ -29,9 +29,7 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,13 +57,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.R
-import com.example.core.ui.components.OrbitBadgeChip
 import com.example.core.ui.components.OrbitDialog
 import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSegmentPill
+import com.example.core.ui.components.OrbitSlider
 import com.example.core.ui.theme.OrbitSpacing
+import com.example.core.ui.theme.OrbitWallpaperScrimBottom
+import com.example.core.ui.theme.OrbitWallpaperScrimMid
+import com.example.core.ui.theme.OrbitWallpaperScrimTop
 import com.example.feature.browser.repository.WallpaperCropMath
 import com.example.feature.browser.repository.WallpaperStorageHelper
 import kotlinx.coroutines.launch
@@ -297,7 +298,7 @@ fun WallpaperAdjustDialog(
                 onClick = { showDummyUiOverlay = !showDummyUiOverlay },
                 modifier = Modifier.testTag("wallpaper_adjust_chip_ui_overlay")
             )
-            Slider(
+            OrbitSlider(
                 value = zoom,
                 onValueChange = { zoom = it.coerceIn(WallpaperCropMath.MIN_ZOOM, WallpaperCropMath.MAX_ZOOM) },
                 valueRange = WallpaperCropMath.MIN_ZOOM..WallpaperCropMath.MAX_ZOOM,
@@ -327,9 +328,9 @@ private fun DummyStartUiOverlay() {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    0.0f to Color(0x22000000),
-                    0.5f to Color(0x36000000),
-                    1.0f to Color(0x90141418)
+                    0.0f to OrbitWallpaperScrimTop,
+                    0.5f to OrbitWallpaperScrimMid,
+                    1.0f to OrbitWallpaperScrimBottom
                 )
             )
             .padding(10.dp)

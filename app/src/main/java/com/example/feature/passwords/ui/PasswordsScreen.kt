@@ -3,37 +3,33 @@ package com.example.feature.passwords.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.core.ui.components.OrbitFloatingActionButton
 import com.example.core.ui.components.OrbitGhostButton
+import com.example.core.ui.components.OrbitNoticeBanner
 import com.example.core.ui.components.OrbitSegmentPill
 import com.example.core.ui.components.OrbitTopBar
 import com.example.core.ui.theme.OrbitSpacing
@@ -95,12 +91,12 @@ fun PasswordsScreen(
             if (uiState.activeSection == PasswordsSection.ALL ||
                 uiState.activeSection == PasswordsSection.LOCAL_VAULT
             ) {
-                FloatingActionButton(
+                OrbitFloatingActionButton(
                     onClick = { showAddDialog = true },
+                    icon = Icons.Rounded.Add,
+                    contentDescription = "Add password",
                     modifier = Modifier.testTag("passwords_add_fab")
-                ) {
-                    Icon(Icons.Rounded.Add, contentDescription = "Add password")
-                }
+                )
             }
         }
     ) { innerPadding ->
@@ -110,29 +106,18 @@ fun PasswordsScreen(
                 .padding(innerPadding)
         ) {
             uiState.clipboardClearRemainingSec?.let { remaining ->
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = OrbitSpacing.md, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Clipboard clears in ${remaining}s",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                OrbitNoticeBanner(
+                    text = "Clipboard clears in ${remaining}s",
+                    icon = Icons.Rounded.ContentPaste,
+                    modifier = Modifier.padding(horizontal = OrbitSpacing.md, vertical = 4.dp),
+                    trailing = {
                         OrbitGhostButton(
                             text = "Clear Now",
                             icon = Icons.Rounded.Close,
                             onClick = viewModel::clearClipboardNow
                         )
                     }
-                }
+                )
             }
 
             LazyRow(

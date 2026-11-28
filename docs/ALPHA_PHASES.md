@@ -1,7 +1,7 @@
 # Orbit Browser — Alpha Version Roadmap & Phase Checklists
 
-**Current Active Phase:** `Alpha 0.4 — Extensible Browser Tools`
-**Baseline Build:** Alpha 0.1 – 0.3 Complete & Verified
+**Current Active Phase:** `Alpha 0.4 — Extensible Browser Tools` (`v0.4.1-alpha`, Build `5`)
+**Baseline Build:** Alpha 0.1 – 0.3 Complete · Tab Previews & Image Collections Added
 
 ---
 
@@ -45,7 +45,7 @@
 - [x] **Tool 1: Site Data Manager & Cookie/Storage Inspector** — Granular global and per-site management for Cookies (`CookieManagerCompat`), Local Storage, Session Storage, IndexedDB, and Cache/Service Workers (`WebStorageCompat` + offline same-origin probe)
 - [ ] **Tool 2: Reader Mode** — Clean distraction-free article extraction view with font size & reading theme controls
 - [x] **Tool 3: Ad/Tracker & Cosmetic Shield (`feature/shield/`)** — EasyPrivacy, AdGuard, Peter Lowe's WorkManager sync, cosmetic CSS element hiding, user-editable ABP rules in Room, `WebEngineSession` engine abstraction, and optional Brave `adblock-rust` JNI bridge + GitHub Actions CI & Renovate
-- [ ] **Tool 4: Offline Saved Pages (WebArchive)** — Save active pages via `WebView.saveWebArchive` and read offline
+- [x] **Tool 4: Offline Saved Pages (WebArchive)** — Save active pages via `WebView.saveWebArchive` and read offline (`feature/offline/`)
 - [ ] **Tool 5: QR Code Link Scanner & Share Generator** — Scan URLs via CameraX/ML Kit or generate shareable QR links
 - [ ] **Tool 6: Tab Groups & Session Snapshots** — Group open tabs by workspace and save/restore named tab collections
 - [ ] **Alpha Stability & Robolectric Tests** — Add unit + Robolectric CUJ tests for `UrlUtils`, `KeystoreCryptoManager`, repositories, and navigation flows

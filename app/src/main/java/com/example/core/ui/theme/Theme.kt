@@ -43,6 +43,7 @@ private val OrbitLightColorScheme = lightColorScheme(
     onSurface = OrbitLightOnSurface,
     surfaceVariant = OrbitLightSurfaceVariant,
     onSurfaceVariant = OrbitLightOnSurfaceVariant,
+    surfaceContainerHigh = OrbitLightSheetPanel,
     outline = OrbitLightOutline,
     error = OrbitLightError,
     onError = OrbitLightOnError
@@ -67,7 +68,8 @@ fun OrbitBrowserTheme(
         baseScheme.copy(
             primary = OrbitIncognitoPurple,
             surface = if (darkTheme) OrbitIncognitoSurface else baseScheme.surface,
-            primaryContainer = OrbitIndigoContainer
+            primaryContainer = OrbitIndigoContainer,
+            onPrimaryContainer = OrbitDarkOnSurface
         )
     } else {
         baseScheme

@@ -144,4 +144,34 @@ internal class BrowserWebCallbackHandler(
             repository.onLiveFaviconUrls(pageUrl, iconUrls)
         }
     }
+
+    override fun onUrlHistoryUpdated(
+        tabId: String,
+        url: String,
+        canGoBack: Boolean,
+        canGoForward: Boolean
+    ) {
+        if (UrlUtils.isStartPage(url)) return
+        val matchedTab = uiState.value.tabs.firstOrNull { it.id == tabId } ?: return
+        val urlChanged = matchedTab.url != url
+        uiState.update { state ->
+            state.copy(
+                omniboxText = if (state.activeTabId == tabId && !state.isOmniboxFocused) {
+                    url
+                } else state.omniboxText,
+                tabs = state.tabs.map { tab ->
+                    if (tab.id == tabId) {
+                        tab.copy(
+                            url = url,
+                            canGoBack = canGoBack,
+                            canGoForward = canGoForward || (tab.forwardToStartPage && tab.url == url)
+                        )
+                    } else tab
+                }
+            )
+        }
+        if (urlChanged) {
+            persistTabById(tabId)
+        }
+    }
 }

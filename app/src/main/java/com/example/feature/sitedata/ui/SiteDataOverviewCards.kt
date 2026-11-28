@@ -1,8 +1,6 @@
 package com.example.feature.sitedata.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,19 +19,16 @@ import androidx.compose.material.icons.rounded.Cached
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.Cookie
 import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.FolderSpecial
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SdStorage
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Timer
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,9 +41,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.core.common.FormatUtils
 import com.example.core.ui.components.OrbitBadgeChip
+import com.example.core.ui.components.OrbitCheckboxRow
 import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitPrimaryButton
+import com.example.core.ui.components.OrbitSheetPanel
 import com.example.core.ui.components.OrbitSurfaceCard
+import com.example.core.ui.components.rememberOrbitSurfacePalette
 import com.example.core.ui.theme.OrbitEmerald
 import com.example.core.ui.theme.OrbitSpacing
 import com.example.feature.sitedata.model.GlobalClearSelection
@@ -79,19 +77,20 @@ fun StorageTelemetryCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(38.dp)
+                    val palette = rememberOrbitSurfacePalette()
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(palette.tile),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.SdStorage,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Rounded.SdStorage,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                     Column {
                         Text(
@@ -152,12 +151,7 @@ private fun MetricPillTile(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
-    ) {
+    OrbitSheetPanel(modifier = modifier) {
         Column(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -217,50 +211,24 @@ fun GlobalCategoryCleanupCard(
                     SiteDataCategory.INDEXED_DB -> selection.clearIndexedDb
                     SiteDataCategory.CACHE -> selection.clearCache
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable(enabled = !isClearing) { onToggleCategory(category) }
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = checked,
-                        onCheckedChange = { onToggleCategory(category) },
-                        enabled = !isClearing,
-                        modifier = Modifier.testTag("global_chk_${category.name.lowercase()}")
-                    )
-                    Icon(
-                        imageVector = categoryIcon(category),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = category.title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = category.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                OrbitCheckboxRow(
+                    title = category.title,
+                    subtitle = category.description,
+                    checked = checked,
+                    onCheckedChange = { onToggleCategory(category) },
+                    leadingIcon = categoryIcon(category),
+                    enabled = !isClearing,
+                    checkboxTestTag = "global_chk_${category.name.lowercase()}",
+                    trailing = {
+                        OrbitGhostButton(
+                            text = "Clear",
+                            onClick = { onClearSingleCategory(category) },
+                            enabled = !isClearing,
+                            isDestructive = true,
+                            modifier = Modifier.testTag("global_clear_one_${category.name.lowercase()}")
                         )
                     }
-                    OrbitGhostButton(
-                        text = "Clear",
-                        onClick = { onClearSingleCategory(category) },
-                        enabled = !isClearing,
-                        isDestructive = true,
-                        modifier = Modifier.testTag("global_clear_one_${category.name.lowercase()}")
-                    )
-                }
+                )
                 if (idx < SiteDataCategory.entries.lastIndex) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f))
                 }
@@ -303,17 +271,18 @@ fun SiteSummaryRowCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val palette = rememberOrbitSurfacePalette()
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .background(palette.tile),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = site.host.take(2).uppercase(),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -331,17 +300,10 @@ fun SiteSummaryRowCard(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         if (site.openTabsCount > 0) {
-                            Surface(
-                                shape = MaterialTheme.shapes.extraSmall,
-                                color = OrbitEmerald.copy(alpha = 0.16f)
-                            ) {
-                                Text(
-                                    text = "${site.openTabsCount} tab${if (site.openTabsCount > 1) "s" else ""}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = OrbitEmerald,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
+                            OrbitBadgeChip(
+                                text = "${site.openTabsCount} tab${if (site.openTabsCount > 1) "s" else ""}",
+                                accentColor = OrbitEmerald
+                            )
                         }
                     }
                     val visitSubtitle = if (site.lastVisitedAt > 0L) {
@@ -413,29 +375,11 @@ fun SiteSummaryRowCard(
 
 @Composable
 private fun SiteMiniTag(label: String, active: Boolean) {
-    Surface(
-        shape = MaterialTheme.shapes.extraSmall,
-        color = if (active) {
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f)
-        } else {
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
-        },
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = if (active) 0.35f else 0.18f)
-        )
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (active) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-        )
-    }
+    OrbitBadgeChip(
+        text = label,
+        accentColor = if (active) MaterialTheme.colorScheme.primary else null,
+        isSubtle = !active
+    )
 }
 
 fun categoryIcon(category: SiteDataCategory): ImageVector = when (category) {

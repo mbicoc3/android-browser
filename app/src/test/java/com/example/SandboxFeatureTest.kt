@@ -84,7 +84,7 @@ class SandboxFeatureTest {
         sqlite.close()
 
         val roomDb = Room.databaseBuilder(context, OrbitDatabase::class.java, dbName)
-            .addMigrations(OrbitDatabase.MIGRATION_8_9)
+            .addMigrations(OrbitDatabase.MIGRATION_8_9, OrbitDatabase.MIGRATION_9_10)
             .allowMainThreadQueries()
             .build()
         try {

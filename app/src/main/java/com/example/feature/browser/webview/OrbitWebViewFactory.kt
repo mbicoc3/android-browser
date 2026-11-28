@@ -41,6 +41,8 @@ interface WebViewCallbacks {
     fun onFindMatchesUpdated(tabId: String, activeMatchOrdinal: Int, numberOfMatches: Int)
     fun onPageFaviconBitmap(tabId: String, pageUrl: String, bitmap: Bitmap) {}
     fun onPageFaviconUrls(tabId: String, pageUrl: String, iconUrls: List<String>) {}
+    fun onUrlHistoryUpdated(tabId: String, url: String, canGoBack: Boolean, canGoForward: Boolean) {}
+    fun onVisualContentChanged(tabId: String) {}
 }
 
 object OrbitWebViewFactory {
@@ -127,6 +129,9 @@ object OrbitWebViewFactory {
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                     callbacks.onProgressChanged(tabId, newProgress)
+                    if (newProgress >= 75) {
+                        callbacks.onVisualContentChanged(tabId)
+                    }
                 }
 
                 override fun onReceivedTitle(view: WebView?, title: String?) {
@@ -242,6 +247,17 @@ object OrbitWebViewFactory {
                         callbacks.onDirectImageDetected(tabId, null)
                     }
 
+                    if (view != null && !UrlUtils.isStartPage(resolvedUrl) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        view.postVisualStateCallback(
+                            System.nanoTime(),
+                            object : WebView.VisualStateCallback() {
+                                override fun onComplete(requestId: Long) {
+                                    callbacks.onVisualContentChanged(tabId)
+                                }
+                            }
+                        )
+                    }
+
                     callbacks.onPageFinished(
                         tabId = tabId,
                         url = resolvedUrl,
@@ -249,6 +265,19 @@ object OrbitWebViewFactory {
                         canGoBack = view?.canGoBack() == true,
                         canGoForward = view?.canGoForward() == true
                     )
+                }
+
+                override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                    super.doUpdateVisitedHistory(view, url, isReload)
+                    if (!url.isNullOrBlank() && !UrlUtils.isStartPage(url)) {
+                        callbacks.onUrlHistoryUpdated(
+                            tabId = tabId,
+                            url = url,
+                            canGoBack = view?.canGoBack() == true,
+                            canGoForward = view?.canGoForward() == true
+                        )
+                        callbacks.onVisualContentChanged(tabId)
+                    }
                 }
             }
 

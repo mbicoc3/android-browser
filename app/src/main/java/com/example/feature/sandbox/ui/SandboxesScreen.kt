@@ -24,8 +24,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -51,6 +49,7 @@ import com.example.core.ui.components.OrbitActionPill
 import com.example.core.ui.components.OrbitBadgeChip
 import com.example.core.ui.components.OrbitConfirmDialog
 import com.example.core.ui.components.OrbitEmptyState
+import com.example.core.ui.components.OrbitExtendedFloatingActionButton
 import com.example.core.ui.components.OrbitFilterField
 import com.example.core.ui.components.OrbitSurfaceCard
 import com.example.core.ui.components.OrbitTopBar
@@ -102,10 +101,10 @@ fun SandboxesScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            OrbitExtendedFloatingActionButton(
+                text = stringResource(R.string.sandboxes_new),
+                icon = Icons.Rounded.Add,
                 onClick = { showCreateDialog = true },
-                icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.sandboxes_new)) },
                 modifier = Modifier.testTag("sandboxes_add_fab")
             )
         }

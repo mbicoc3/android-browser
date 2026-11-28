@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.core.datastore.BrowserPreferences
+import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitModalBottomSheet
 import com.example.core.ui.components.OrbitSheetHairlineDivider
 import com.example.core.ui.components.OrbitSheetHeader
@@ -58,7 +58,6 @@ fun DownloadSettingsSheet(
     OrbitModalBottomSheet(onDismissRequest = onDismiss) {
         OrbitSheetHeader(
             title = stringResource(R.string.downloads_settings_title),
-            subtitle = "Storage, parallel streams & network rules",
             icon = Icons.Rounded.Tune,
             trailing = {
                 OrbitSheetStatusPill(text = "${preferences.downloadChunkCount}x")
@@ -108,9 +107,10 @@ fun DownloadSettingsSheet(
                         modifier = Modifier.weight(1f)
                     )
                     if (preferences.downloadFolderUri.isNotBlank()) {
-                        TextButton(onClick = onResetFolder) {
-                            Text(stringResource(R.string.downloads_reset_folder))
-                        }
+                        OrbitGhostButton(
+                            text = stringResource(R.string.downloads_reset_folder),
+                            onClick = onResetFolder
+                        )
                     }
                 }
             }
@@ -138,11 +138,6 @@ fun DownloadSettingsSheet(
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
                     )
                 }
-                Text(
-                    text = "Splits large files into parallel HTTP Range connections for faster downloads when servers allow.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -162,7 +157,6 @@ fun DownloadSettingsSheet(
         OrbitSheetPanel {
             OrbitSheetSwitchRow(
                 title = stringResource(R.string.downloads_confirm_toggle),
-                subtitle = stringResource(R.string.downloads_confirm_subtitle),
                 icon = Icons.Rounded.Download,
                 checked = preferences.confirmBeforeDownload,
                 onCheckedChange = onConfirmBeforeDownloadChanged,
@@ -171,7 +165,6 @@ fun DownloadSettingsSheet(
             OrbitSheetHairlineDivider()
             OrbitSheetSwitchRow(
                 title = stringResource(R.string.downloads_wifi_only),
-                subtitle = stringResource(R.string.downloads_wifi_only_subtitle),
                 icon = Icons.Rounded.Wifi,
                 checked = preferences.downloadWifiOnly,
                 onCheckedChange = onWifiOnlyChanged,

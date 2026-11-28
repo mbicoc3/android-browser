@@ -30,12 +30,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
-import com.example.core.common.OrbitShareHelper
 import com.example.core.common.UrlUtils
 import com.example.core.database.entity.OfflinePageEntity
 import com.example.core.navigation.BrowserRoutes
 import com.example.core.registry.BrowserFeatureModule
-import com.example.core.registry.BrowserToolRegistry
 import com.example.feature.browser.model.WebCommand
 import com.example.feature.browser.model.WebContextMenuTarget
 import com.example.feature.browser.viewmodel.BrowserViewModel
@@ -61,6 +59,7 @@ fun BrowserScreen(
     onToggleBlockTrackers: (Boolean) -> Unit,
     onToggleCosmeticFiltering: (Boolean) -> Unit,
     onSaveBookmark: (title: String, url: String) -> Unit,
+    onCollectImage: (title: String, imageUrl: String, sourcePageUrl: String) -> Unit = { _, _, _ -> },
     onSaveOfflinePage: suspend (webView: WebView, title: String, url: String) -> Result<OfflinePageEntity>,
     onDownloadFolderPicked: (Uri) -> Unit,
     onConfirmBeforeDownloadChanged: (Boolean) -> Unit,
@@ -95,6 +94,20 @@ fun BrowserScreen(
 
     val latestIsStartPage = rememberUpdatedState(isStartPage)
     val latestActiveTabId = rememberUpdatedState(activeTab?.id)
+    val latestPreviewEnabled = rememberUpdatedState(state.preferences.tabPreviewEnabled)
+
+    val captureActiveTabPreviewNow: () -> Unit = remember(webViewPool) {
+        {
+            val tabId = latestActiveTabId.value
+            if (tabId != null && !latestIsStartPage.value) {
+                webViewPool.capturePreviewIfEnabled(
+                    tabId = tabId,
+                    enabled = latestPreviewEnabled.value,
+                    force = true
+                )
+            }
+        }
+    }
     val pullRefreshCallbacks = remember {
         object : PullRefreshCallbacks {
             override fun onPullProgress(fraction: Float) {
@@ -116,6 +129,23 @@ fun BrowserScreen(
         }
     }
 
+    val handleInstantDownload: (String, String?, String?) -> Unit = { url, contentDisposition, mimeType ->
+        val guessed = URLUtil.guessFileName(url, contentDisposition, mimeType)
+        val prefs = state.preferences
+        onEnqueueDownload(
+            url,
+            guessed,
+            mimeType,
+            prefs.downloadChunkCount,
+            prefs.downloadFolderUri,
+            prefs.downloadFolderLabel,
+            prefs.downloadWifiOnly
+        )
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar("Download started: $guessed (${prefs.downloadChunkCount}x)")
+        }
+    }
+
     val handleDownloadRequest: (String, String?, String?) -> Unit = { url, contentDisposition, mimeType ->
         val guessed = URLUtil.guessFileName(url, contentDisposition, mimeType)
         if (state.preferences.confirmBeforeDownload) {
@@ -125,19 +155,7 @@ fun BrowserScreen(
                 mimeType = mimeType
             )
         } else {
-            val prefs = state.preferences
-            onEnqueueDownload(
-                url,
-                guessed,
-                mimeType,
-                prefs.downloadChunkCount,
-                prefs.downloadFolderUri,
-                prefs.downloadFolderLabel,
-                prefs.downloadWifiOnly
-            )
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("Download started: $guessed (${prefs.downloadChunkCount}x)")
-            }
+            handleInstantDownload(url, contentDisposition, mimeType)
         }
     }
 
@@ -151,8 +169,16 @@ fun BrowserScreen(
         viewModel = viewModel,
         onCloseQuickPanel = { isQuickPanelOpen = false },
         onRequestDownload = handleDownloadRequest,
-        onNavigateToRoute = onNavigateToRoute,
-        onOpenTabs = onOpenTabs
+        onCollectImage = onCollectImage,
+        onBeforeTabSwitch = captureActiveTabPreviewNow,
+        onNavigateToRoute = { route ->
+            captureActiveTabPreviewNow()
+            onNavigateToRoute(route)
+        },
+        onOpenTabs = {
+            captureActiveTabPreviewNow()
+            onOpenTabs()
+        }
     )
 
     val pageMenuCallbacks = rememberBrowserPageMenuCallbacks(
@@ -165,7 +191,11 @@ fun BrowserScreen(
         coroutineScope = coroutineScope,
         viewModel = viewModel,
         onSaveOfflinePage = onSaveOfflinePage,
-        onNavigateToRoute = onNavigateToRoute,
+        onCollectImage = onCollectImage,
+        onNavigateToRoute = { route ->
+            captureActiveTabPreviewNow()
+            onNavigateToRoute(route)
+        },
         onOpenSandboxPicker = { showSandboxPicker = true }
     )
 
@@ -195,12 +225,13 @@ fun BrowserScreen(
         }
     }
 
-    LaunchedEffect(activeTab?.id, activeTab?.url, activeTab?.isLoading, state.preferences.tabPreviewEnabled) {
-        if (activeTab != null && !isStartPage && !activeTab.isLoading && state.preferences.tabPreviewEnabled) {
-            kotlinx.coroutines.delay(250)
-            webViewPool.capturePreviewIfEnabled(activeTab.id, enabled = true)
-        }
-    }
+    BrowserPreviewSyncEffects(
+        activeTab = activeTab,
+        isStartPage = isStartPage,
+        tabPreviewEnabled = state.preferences.tabPreviewEnabled,
+        webViewPool = webViewPool,
+        onCaptureNow = captureActiveTabPreviewNow
+    )
 
     LaunchedEffect(isStartPage, activeTab?.id) {
         pullRefreshFraction = 0f
@@ -240,24 +271,14 @@ fun BrowserScreen(
     }
 
     val handleModuleAction: (BrowserFeatureModule) -> Unit = { module ->
-        when {
-            module.route == com.example.core.navigation.BrowserRoutes.SITE_DATA -> {
-                val activeOrigin = UrlUtils.extractOrigin(activeTab?.url)
-                onNavigateToRoute(com.example.core.navigation.BrowserRoutes.siteDataRoute(activeOrigin))
-            }
-            module.route != null -> onNavigateToRoute(module.route)
-            module.id == BrowserToolRegistry.ACTION_FIND_IN_PAGE -> viewModel.toggleFindInPage(true)
-            module.id == BrowserToolRegistry.ACTION_TOGGLE_DESKTOP -> viewModel.toggleDesktopModeForActiveTab()
-            module.id == BrowserToolRegistry.ACTION_TOGGLE_INCOGNITO -> {
-                viewModel.openUrlInNewTab(UrlUtils.START_PAGE_URL, isIncognito = true)
-            }
-            module.id == BrowserToolRegistry.ACTION_SHARE_PAGE -> {
-                val url = activeTab?.url.orEmpty()
-                if (!UrlUtils.isStartPage(url)) {
-                    OrbitShareHelper.shareWithChooser(context, activeTab?.title, url)
-                }
-            }
-        }
+        dispatchBrowserModuleAction(
+            context = context,
+            module = module,
+            activeTab = activeTab,
+            viewModel = viewModel,
+            onBeforeTabChange = captureActiveTabPreviewNow,
+            onNavigateToRoute = onNavigateToRoute
+        )
     }
 
     Scaffold(
@@ -290,20 +311,27 @@ fun BrowserScreen(
                         },
                         onReloadOrStop = viewModel::reloadOrStop,
                         onOpenTabs = {
-                            if (activeTab != null && !isStartPage) {
-                                webViewPool.capturePreviewIfEnabled(
-                                    tabId = activeTab.id,
-                                    enabled = state.preferences.tabPreviewEnabled,
-                                    force = true
-                                )
-                            }
+                            captureActiveTabPreviewNow()
                             onOpenTabs()
                         },
-                        onSwitchTab = viewModel::switchTabByOffset,
+                        onSwitchTab = { offset ->
+                            captureActiveTabPreviewNow()
+                            viewModel.switchTabByOffset(offset)
+                        },
                         onInspectSiteData = {
+                            captureActiveTabPreviewNow()
                             isQuickPanelOpen = false
                             val activeOrigin = UrlUtils.extractOrigin(activeTab?.url)
                             onNavigateToRoute(BrowserRoutes.siteDataRoute(activeOrigin))
+                        },
+                        onDirectImageDownload = {
+                            val img = activeTab?.directImage
+                            val url = img?.url ?: activeTab?.url.orEmpty()
+                            if (url.isNotBlank() && !isStartPage) {
+                                isQuickPanelOpen = false
+                                focusManager.clearFocus()
+                                handleInstantDownload(url, null, img?.mimeType)
+                            }
                         },
                         multiPurposeCallbacks = multiPurposeCallbacks,
                         pageMenuCallbacks = pageMenuCallbacks
@@ -339,26 +367,28 @@ fun BrowserScreen(
                 isLightSolidStart = isLightSolidStart,
                 onBack = { viewModel.goBack() },
                 onForward = viewModel::goForward,
-                onNewTab = { viewModel.openUrlInNewTab(UrlUtils.START_PAGE_URL) },
+                onNewTab = {
+                    captureActiveTabPreviewNow()
+                    viewModel.openUrlInNewTab(UrlUtils.START_PAGE_URL)
+                },
                 onGoHome = {
                     if (!isStartPage) {
+                        captureActiveTabPreviewNow()
                         viewModel.goHome()
                     }
                 },
                 onOpenTabs = {
-                    if (activeTab != null && !isStartPage) {
-                        webViewPool.capturePreviewIfEnabled(
-                            tabId = activeTab.id,
-                            enabled = state.preferences.tabPreviewEnabled,
-                            force = true
-                        )
-                    }
+                    captureActiveTabPreviewNow()
                     onOpenTabs()
                 },
                 onNewIncognitoTab = {
+                    captureActiveTabPreviewNow()
                     viewModel.openUrlInNewTab(UrlUtils.START_PAGE_URL, isIncognito = true)
                 },
-                onSwitchTab = viewModel::switchTabByOffset,
+                onSwitchTab = { offset ->
+                    captureActiveTabPreviewNow()
+                    viewModel.switchTabByOffset(offset)
+                },
                 onOpenTools = { showToolsSheet = true }
             )
         }
@@ -487,6 +517,8 @@ fun BrowserScreen(
         onToggleBlockTrackers = onToggleBlockTrackers,
         onToggleCosmeticFiltering = onToggleCosmeticFiltering,
         onSaveBookmark = onSaveBookmark,
+        onCollectImage = onCollectImage,
+        onBeforeTabLeave = captureActiveTabPreviewNow,
         onDownloadFolderPicked = onDownloadFolderPicked,
         onConfirmBeforeDownloadChanged = onConfirmBeforeDownloadChanged,
         onRequestDownload = handleDownloadRequest,

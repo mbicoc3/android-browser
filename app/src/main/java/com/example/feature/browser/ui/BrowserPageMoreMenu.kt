@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.DesktopWindows
 import androidx.compose.material.icons.rounded.FindInPage
 import androidx.compose.material.icons.rounded.Layers
@@ -26,10 +26,8 @@ import androidx.compose.material.icons.rounded.OfflinePin
 import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -49,11 +47,14 @@ import com.example.core.common.OrbitShareHelper
 import com.example.core.common.UrlUtils
 import com.example.core.ui.components.OrbitControlTokens
 import com.example.core.ui.components.OrbitPopupMenu
+import com.example.core.ui.components.OrbitPopupMenuDivider
 import com.example.core.ui.components.OrbitPopupMenuItem
+import com.example.core.ui.components.OrbitSwitch
 import com.example.core.ui.components.rememberOrbitSurfacePalette
 
 data class BrowserPageMenuCallbacks(
     val onToggleBookmark: () -> Unit,
+    val onCollectImage: () -> Unit = {},
     val onShare: () -> Unit,
     val onQuickShare: () -> Unit,
     val onToggleDesktopMode: () -> Unit,
@@ -71,6 +72,7 @@ fun BrowserPageMoreMenu(
     currentUrl: String,
     isBookmarked: Boolean,
     isDesktopMode: Boolean,
+    isDirectImage: Boolean = false,
     activeSandboxName: String? = null,
     lastShareComponent: String,
     lastShareAppLabel: String,
@@ -109,6 +111,18 @@ fun BrowserPageMoreMenu(
             modifier = Modifier.testTag("more_menu_bookmark")
         )
 
+        if (isDirectImage) {
+            OrbitPopupMenuItem(
+                text = stringResource(R.string.collections_collect_image),
+                icon = Icons.Rounded.CollectionsBookmark,
+                onClick = {
+                    onDismiss()
+                    callbacks.onCollectImage()
+                },
+                modifier = Modifier.testTag("more_menu_collect_image")
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,25 +142,25 @@ fun BrowserPageMoreMenu(
                     .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
                     .testTag("more_menu_share_button"),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(palette.tile.copy(alpha = 0.72f)),
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(palette.tile.copy(alpha = 0.9f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Share,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
                 Text(
                     text = stringResource(R.string.more_menu_share),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -189,18 +203,14 @@ fun BrowserPageMoreMenu(
             }
         }
 
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-            thickness = 0.7.dp,
-            color = palette.innerDivider
-        )
+        OrbitPopupMenuDivider()
 
         OrbitPopupMenuItem(
             text = stringResource(R.string.more_menu_desktop_agent),
             icon = Icons.Rounded.DesktopWindows,
             active = isDesktopMode,
             trailing = {
-                Switch(
+                OrbitSwitch(
                     checked = isDesktopMode,
                     onCheckedChange = null
                 )
@@ -244,11 +254,7 @@ fun BrowserPageMoreMenu(
             modifier = Modifier.testTag("more_menu_save_offline")
         )
 
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-            thickness = 0.7.dp,
-            color = palette.innerDivider
-        )
+        OrbitPopupMenuDivider()
 
         OrbitPopupMenuItem(
             text = if (!activeSandboxName.isNullOrBlank()) {

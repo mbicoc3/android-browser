@@ -2,7 +2,7 @@
 
 ## 1. Project Identity & Source of Truth
 - **Application Name:** `Orbit` (`app_name` in `app/src/main/res/values/strings.xml`, `rootProject.name` in `settings.gradle.kts`, and `metadata.json`).
-- **Application ID:** `com.aistudio.orbitbrowser.kxmpzq` (do not alter `namespace = "com.example"` or package folder layout).
+- **Application ID:** `com.mirazkbr.orbitbrowser` (do not alter `namespace = "com.example"` or package folder layout).
 - **Platform & Tech Stack:**
   - **Language:** Kotlin exclusively
   - **UI:** Jetpack Compose (Material Design 3)

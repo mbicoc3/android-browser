@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.BuildConfig
 import com.example.R
 import com.example.core.registry.BrowserFeatureModule
 import com.example.core.registry.BrowserToolRegistry
@@ -49,7 +50,7 @@ fun ToolsHubScreen(
         topBar = {
             OrbitTopBar(
                 title = stringResource(R.string.tools_hub_title),
-                subtitle = stringResource(R.string.tools_hub_subtitle),
+                subtitle = "${stringResource(R.string.tools_hub_subtitle)} · v${BuildConfig.VERSION_NAME}",
                 onBackClick = onBack
             )
         }
@@ -92,11 +93,6 @@ fun ToolsHubScreen(
                                 Text(
                                     text = module.title,
                                     style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = module.subtitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             module.badgeText?.let {

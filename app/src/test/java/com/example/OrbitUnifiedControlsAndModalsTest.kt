@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.example.core.datastore.AppThemeMode
 import com.example.core.ui.components.OrbitActionPill
 import com.example.core.ui.components.OrbitConfirmDialog
+import com.example.core.ui.components.OrbitControlTokens
 import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
@@ -104,12 +105,12 @@ class OrbitUnifiedControlsAndModalsTest {
         }
 
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag("uniform_input").assertHeightIsAtLeast(38.dp)
-        composeRule.onNodeWithTag("uniform_primary").assertHeightIsEqualTo(36.dp)
-        composeRule.onNodeWithTag("uniform_secondary").assertHeightIsEqualTo(36.dp)
-        composeRule.onNodeWithTag("uniform_ghost").assertHeightIsEqualTo(36.dp)
-        composeRule.onNodeWithTag("uniform_segment").assertHeightIsEqualTo(28.dp)
-        composeRule.onNodeWithTag("uniform_action_pill").assertHeightIsEqualTo(28.dp)
+        composeRule.onNodeWithTag("uniform_input").assertHeightIsAtLeast(OrbitControlTokens.InputMinHeight)
+        composeRule.onNodeWithTag("uniform_primary").assertHeightIsEqualTo(OrbitControlTokens.ControlHeight)
+        composeRule.onNodeWithTag("uniform_secondary").assertHeightIsEqualTo(OrbitControlTokens.ControlHeight)
+        composeRule.onNodeWithTag("uniform_ghost").assertHeightIsEqualTo(OrbitControlTokens.ControlHeight)
+        composeRule.onNodeWithTag("uniform_segment").assertHeightIsEqualTo(OrbitControlTokens.CapsuleHeight)
+        composeRule.onNodeWithTag("uniform_action_pill").assertHeightIsEqualTo(OrbitControlTokens.CapsuleHeight)
     }
 
     @Test

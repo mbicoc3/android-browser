@@ -26,7 +26,7 @@ Core Infrastructure (core/database, core/datastore, core/network, core/worker, c
   - `core/common/` — `UiState`, `UrlUtils`, `SearchEngine`, `FormatUtils`, `OrbitShareHelper`
   - `core/navigation/` — `BrowserRoutes` constants
   - `core/registry/` — `BrowserFeatureModule` & `BrowserToolRegistry`
-  - `core/database/` — Room `OrbitDatabase` (v6), 10 Entities, 10 DAOs
+  - `core/database/` — Room `OrbitDatabase` (v10), 17 Entities, 12+ DAOs
   - `core/datastore/` — `BrowserPreferences` & `BrowserPreferencesDataStore`
   - `core/network/` — `NetworkClientFactory` (OkHttp + Moshi) & `SearchSuggestionApi` / `FilterListApi` (Retrofit)
   - `core/worker/` — `FileDownloadWorker`, `MaintenanceWorker` & `FilterListSyncWorker` (WorkManager)
@@ -39,6 +39,7 @@ Core Infrastructure (core/database, core/datastore, core/network, core/worker, c
   - `feature/browser/` — WebView engine, Start Page, Omnibox, Find-in-Page, Tools Sheet
   - `feature/tabs/` — Tab Switcher (`Card View` / `List View`) with `TabPreviewStore` (`RGB_565` `LruCache`) for Standard & Incognito tabs
   - `feature/bookmarks/` — Local Room bookmarks + folder filter
+  - `feature/collections/` — Image URL collections + temporary downscaled `RGB_565` thumbnail previews (`diskCachePolicy(DISABLED)`)
   - `feature/history/` — Chronological visit timeline
   - `feature/offline/` — Saved offline `.mht` webpage archives (`WebView.saveWebArchive`)
   - `feature/downloads/` — Multi-chunk WorkManager download manager (`ChunkedDownloadEngine`, SAF folder picker, pre-download confirmation, pause/resume)
@@ -72,11 +73,12 @@ Core Infrastructure (core/database, core/datastore, core/network, core/worker, c
 
 ## 4. Persistence, Networking, Background Work & Security
 
-### Room Database (`OrbitDatabase` v6)
+### Room Database (`OrbitDatabase` v10)
 | Entity | Table | Purpose |
 |---|---|---|
 | `BrowserTabEntity` | `browser_tabs` | Persists standard (non-incognito) open tabs |
 | `BookmarkEntity` | `bookmarks` | Saved URLs with unique URL index & folder tag |
+| `ImageCollectionEntity` | `image_collections` | Saved image URLs, source page URL, & collection folder (temporary RAM-only thumbnails) |
 | `HistoryEntity` | `history` | Chronological page visits (indexed by `visitedAt`) |
 | `OfflinePageEntity` | `offline_pages` | Saved `.mht` webpage archive metadata & file path |
 | `DownloadEntity` | `downloads` | Download metadata, progress, speed, chunk count, SAF/MediaStore destination, WorkRequest UUID |

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.ContentCopy
@@ -18,13 +17,11 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,12 +36,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.core.common.FormatUtils
 import com.example.core.ui.components.OrbitBadgeChip
+import com.example.core.ui.components.OrbitCheckboxRow
 import com.example.core.ui.components.OrbitConfirmDialog
 import com.example.core.ui.components.OrbitDialog
 import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSegmentPill
+import com.example.core.ui.components.OrbitSheetPanel
 import com.example.core.ui.components.OrbitTextField
 import com.example.core.ui.theme.OrbitEmerald
 import com.example.core.ui.theme.OrbitMonoStyle
@@ -257,7 +256,7 @@ fun AddEditCredentialDialog(
                     .testTag("cred_dialog_save_button")
             )
         }
-    ) { palette ->
+    ) { _ ->
         OrbitTextField(
             value = title,
             onValueChange = { title = it },
@@ -335,20 +334,16 @@ fun AddEditCredentialDialog(
             minLines = 2,
             maxLines = 3
         )
-        Surface(
-            onClick = { isFavorite = !isFavorite },
-            shape = RoundedCornerShape(14.dp),
-            color = palette.panel
+        OrbitSheetPanel(
+            selected = isFavorite,
+            onClick = { isFavorite = !isFavorite }
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(checked = isFavorite, onCheckedChange = { isFavorite = it })
-                Text("Favorite", style = MaterialTheme.typography.bodyMedium)
-            }
+            OrbitCheckboxRow(
+                title = "Favorite",
+                checked = isFavorite,
+                onCheckedChange = { isFavorite = it },
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+            )
         }
     }
 }

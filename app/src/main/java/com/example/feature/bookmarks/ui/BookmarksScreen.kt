@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import com.example.core.ui.components.OrbitBadgeChip
 import com.example.core.ui.components.OrbitDialog
 import com.example.core.ui.components.OrbitEmptyState
 import com.example.core.ui.components.OrbitFilterField
+import com.example.core.ui.components.OrbitFloatingActionButton
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSegmentPill
@@ -69,12 +69,12 @@ fun BookmarksScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            OrbitFloatingActionButton(
                 onClick = { showAddDialog = true },
+                icon = Icons.Rounded.Add,
+                contentDescription = stringResource(R.string.bookmarks_add),
                 modifier = Modifier.testTag("add_bookmark_fab")
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.bookmarks_add))
-            }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -203,7 +203,6 @@ private fun AddBookmarkDialog(
     OrbitDialog(
         onDismissRequest = onDismiss,
         title = stringResource(R.string.bookmarks_add),
-        subtitle = "Save this link into a bookmark folder",
         icon = Icons.Rounded.BookmarkAdd,
         actions = {
             OrbitSecondaryButton(

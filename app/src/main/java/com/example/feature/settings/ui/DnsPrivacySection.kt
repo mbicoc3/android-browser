@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Dns
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +31,7 @@ import com.example.core.network.PrivateDnsMode
 import com.example.core.network.PrivateDnsStatus
 import com.example.core.ui.components.OrbitActionPill
 import com.example.core.ui.components.OrbitBadgeChip
+import com.example.core.ui.components.OrbitRadioOptionRow
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSurfaceCard
 import com.example.core.ui.theme.OrbitEmerald
@@ -80,41 +78,19 @@ fun DnsPrivacySection(
                                 text = "Free DNS-over-HTTPS (App DoH)",
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            Text(
-                                text = "Encrypts suggestions, filter updates, downloads & breach checks",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
                     }
                     OrbitBadgeChip(text = "FREE")
                 }
 
                 DohProvider.entries.forEach { provider ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = selectedDohProvider == provider,
-                            onClick = { onSelectDohProvider(provider) },
-                            modifier = Modifier.testTag("settings_doh_${provider.id}")
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = provider.displayName,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = provider.subtitle,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+                    OrbitRadioOptionRow(
+                        title = provider.displayName,
+                        subtitle = provider.subtitle,
+                        selected = selectedDohProvider == provider,
+                        onClick = { onSelectDohProvider(provider) },
+                        radioTestTag = "settings_doh_${provider.id}"
+                    )
                 }
 
                 OrbitSecondaryButton(

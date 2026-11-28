@@ -16,7 +16,6 @@ import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +34,7 @@ import com.example.core.ui.components.OrbitDialog
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSurfaceCard
+import com.example.core.ui.components.OrbitSwitch
 import com.example.core.ui.components.OrbitTextField
 import com.example.core.ui.theme.OrbitSpacing
 import com.example.feature.shield.model.FilterListItem
@@ -159,7 +159,7 @@ fun FilterListCard(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Switch(
+            OrbitSwitch(
                 checked = item.enabled,
                 onCheckedChange = onToggle,
                 modifier = Modifier.testTag("filter_list_switch_${item.id}")
@@ -200,7 +200,7 @@ fun CustomRuleCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Switch(
+            OrbitSwitch(
                 checked = rule.enabled,
                 onCheckedChange = onToggle,
                 modifier = Modifier.testTag("custom_rule_switch_${rule.id}")
@@ -280,7 +280,6 @@ fun AddCustomRuleDialog(
     OrbitDialog(
         onDismissRequest = onDismiss,
         title = "Add AdBlock / Cosmetic Rule",
-        subtitle = "Adblock Plus network & cosmetic filter rule",
         icon = Icons.Rounded.Shield,
         actions = {
             OrbitSecondaryButton(

@@ -1,10 +1,9 @@
 package com.example.core.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +21,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalTextStyle
@@ -34,11 +36,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.core.ui.theme.OrbitDarkSheetActiveFill
 import com.example.core.ui.theme.OrbitDarkSheetCanvas
 import com.example.core.ui.theme.OrbitDarkSheetHairline
 import com.example.core.ui.theme.OrbitDarkSheetHandle
@@ -56,6 +59,7 @@ import com.example.core.ui.theme.OrbitDarkSheetPanel
 import com.example.core.ui.theme.OrbitDarkSheetScrim
 import com.example.core.ui.theme.OrbitDarkSheetTile
 import com.example.core.ui.theme.OrbitDarkSheetTopHighlight
+import com.example.core.ui.theme.OrbitLightSheetActiveFill
 import com.example.core.ui.theme.OrbitLightSheetCanvas
 import com.example.core.ui.theme.OrbitLightSheetHairline
 import com.example.core.ui.theme.OrbitLightSheetHandle
@@ -65,13 +69,19 @@ import com.example.core.ui.theme.OrbitLightSheetTile
 import com.example.core.ui.theme.OrbitLightSheetTopHighlight
 
 object OrbitControlTokens {
-    val ControlHeight = 36.dp
-    val InputMinHeight = 38.dp
-    val CapsuleHeight = 28.dp
-    val ControlCornerRadius = 10.dp
-    val SegmentCornerRadius = 9.dp
-    val DialogCornerRadius = 18.dp
-    val PopupCornerRadius = 14.dp
+    val ControlHeight = 40.dp
+    val InputMinHeight = 42.dp
+    val CapsuleHeight = 32.dp
+    val OmniboxHeight = 40.dp
+    val StartSearchHeight = 52.dp
+    val ControlCornerRadius = 12.dp
+    val SegmentCornerRadius = 16.dp
+    val CardCornerRadius = 16.dp
+    val PanelCornerRadius = 16.dp
+    val DialogCornerRadius = 22.dp
+    val PopupCornerRadius = 16.dp
+    val SheetCornerRadius = 24.dp
+    val FabCornerRadius = 16.dp
     val HairlineWidth = 0.8.dp
 }
 
@@ -105,8 +115,8 @@ fun rememberOrbitSurfacePalette(): OrbitSurfacePalette {
             scrim = OrbitDarkSheetScrim,
             handle = OrbitDarkSheetHandle,
             innerDivider = OrbitDarkSheetHairline,
-            activeFill = primary.copy(alpha = 0.17f),
-            activeBorder = primary.copy(alpha = 0.55f)
+            activeFill = OrbitDarkSheetActiveFill,
+            activeBorder = primary.copy(alpha = 0.72f)
         )
     } else {
         OrbitSurfacePalette(
@@ -119,8 +129,8 @@ fun rememberOrbitSurfacePalette(): OrbitSurfacePalette {
             scrim = OrbitLightSheetScrim,
             handle = OrbitLightSheetHandle,
             innerDivider = OrbitLightSheetHairline,
-            activeFill = primary.copy(alpha = 0.12f),
-            activeBorder = primary.copy(alpha = 0.48f)
+            activeFill = OrbitLightSheetActiveFill,
+            activeBorder = primary.copy(alpha = 0.72f)
         )
     }
 }
@@ -134,7 +144,7 @@ fun OrbitPrimaryButton(
     isDestructive: Boolean = false,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
 ) {
     val palette = rememberOrbitSurfacePalette()
     val containerColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -165,14 +175,14 @@ fun OrbitPrimaryButton(
                     color = contentColor,
                     modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             }
             Text(
                 text = text,
@@ -193,18 +203,18 @@ fun OrbitSecondaryButton(
     isDestructive: Boolean = false,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
 ) {
     val palette = rememberOrbitSurfacePalette()
     val borderColor = when {
-        !enabled -> palette.hairline.copy(alpha = 0.45f)
-        isDestructive -> MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
+        !enabled -> palette.hairline.copy(alpha = 0.4f)
+        isDestructive -> MaterialTheme.colorScheme.error.copy(alpha = 0.42f)
         else -> palette.hairline
     }
     val containerColor = when {
         !enabled -> palette.panel.copy(alpha = 0.5f)
-        isDestructive -> MaterialTheme.colorScheme.error.copy(alpha = if (palette.isDark) 0.14f else 0.08f)
-        else -> palette.tile.copy(alpha = 0.72f)
+        isDestructive -> MaterialTheme.colorScheme.error.copy(alpha = if (palette.isDark) 0.12f else 0.06f)
+        else -> palette.panel
     }
     val contentColor = when {
         !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -214,7 +224,7 @@ fun OrbitSecondaryButton(
     val iconTint = when {
         !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
         isDestructive -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
@@ -238,15 +248,15 @@ fun OrbitSecondaryButton(
                     color = iconTint,
                     modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             }
             Text(
                 text = text,
@@ -266,7 +276,7 @@ fun OrbitGhostButton(
     enabled: Boolean = true,
     isDestructive: Boolean = false,
     icon: ImageVector? = null,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
 ) {
     val palette = rememberOrbitSurfacePalette()
     val tint = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -279,9 +289,9 @@ fun OrbitGhostButton(
             shape = RoundedCornerShape(OrbitControlTokens.ControlCornerRadius),
             colors = ButtonDefaults.textButtonColors(
                 containerColor = if (isDestructive) {
-                    MaterialTheme.colorScheme.error.copy(alpha = if (palette.isDark) 0.10f else 0.06f)
+                    MaterialTheme.colorScheme.error.copy(alpha = if (palette.isDark) 0.10f else 0.05f)
                 } else {
-                    palette.tile.copy(alpha = 0.36f)
+                    Color.Transparent
                 },
                 contentColor = tint,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -292,9 +302,9 @@ fun OrbitGhostButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(5.dp))
             }
             Text(
                 text = text,
@@ -304,6 +314,59 @@ fun OrbitGhostButton(
             )
         }
     }
+}
+
+@Composable
+fun OrbitFloatingActionButton(
+    onClick: () -> Unit,
+    icon: ImageVector,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary
+) {
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(OrbitControlTokens.FabCornerRadius),
+        containerColor = containerColor,
+        contentColor = contentColor,
+        elevation = FloatingActionButtonDefaults.elevation(
+            defaultElevation = 3.dp,
+            pressedElevation = 6.dp
+        )
+    ) {
+        Icon(imageVector = icon, contentDescription = contentDescription)
+    }
+}
+
+@Composable
+fun OrbitExtendedFloatingActionButton(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary
+) {
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(OrbitControlTokens.FabCornerRadius),
+        containerColor = containerColor,
+        contentColor = contentColor,
+        elevation = FloatingActionButtonDefaults.elevation(
+            defaultElevation = 3.dp,
+            pressedElevation = 6.dp
+        ),
+        icon = { Icon(imageVector = icon, contentDescription = null) },
+        text = {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+            )
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -349,7 +412,7 @@ fun OrbitTextField(
         unfocusedContainerColor = unfocusedContainer,
         disabledContainerColor = unfocusedContainer.copy(alpha = 0.5f),
         errorContainerColor = unfocusedContainer,
-        focusedBorderColor = primary.copy(alpha = 0.88f),
+        focusedBorderColor = primary.copy(alpha = 0.9f),
         unfocusedBorderColor = palette.hairline,
         disabledBorderColor = palette.hairline.copy(alpha = 0.45f),
         errorBorderColor = MaterialTheme.colorScheme.error,
@@ -413,7 +476,7 @@ fun OrbitTextField(
                 trailingIcon = trailingIcon,
                 supportingText = supportingText,
                 colors = colors,
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                 container = {
                     OutlinedTextFieldDefaults.Container(
                         enabled = enabled,
@@ -431,96 +494,29 @@ fun OrbitTextField(
 }
 
 @Composable
-fun OrbitSegmentPill(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
+fun OrbitSearchPillSurface(
+    focused: Boolean,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    leadingIcon: ImageVector? = null
+    height: Dp = OrbitControlTokens.OmniboxHeight,
+    shape: Shape = RoundedCornerShape(OrbitControlTokens.OmniboxHeight / 2),
+    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.65f),
+    focusedBorderColor: Color = MaterialTheme.colorScheme.primary,
+    shadowElevation: Dp = 0.dp,
+    content: @Composable () -> Unit
 ) {
-    val palette = rememberOrbitSurfacePalette()
-    val primary = MaterialTheme.colorScheme.primary
-    val bgColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> palette.panel.copy(alpha = 0.5f)
-            selected -> primary.copy(alpha = if (palette.isDark) 0.22f else 0.14f)
-            else -> palette.tile
-        },
-        animationSpec = tween(160),
-        label = "orbit_segment_bg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> palette.hairline.copy(alpha = 0.4f)
-            selected -> primary.copy(alpha = 0.6f)
-            else -> palette.hairline
-        },
-        animationSpec = tween(160),
-        label = "orbit_segment_border"
-    )
-    val contentColor = when {
-        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-        selected -> primary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-
-    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-        Surface(
-            onClick = onClick,
-            enabled = enabled,
-            modifier = modifier.height(OrbitControlTokens.CapsuleHeight),
-            shape = RoundedCornerShape(OrbitControlTokens.SegmentCornerRadius),
-            color = bgColor,
-            border = BorderStroke(
-                width = if (selected) 1.dp else OrbitControlTokens.HairlineWidth,
-                color = borderColor
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                if (leadingIcon != null) {
-                    Icon(
-                        imageVector = leadingIcon,
-                        contentDescription = null,
-                        tint = if (selected || !enabled) contentColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.5.sp,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
-                    ),
-                    color = contentColor,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+    Surface(
+        modifier = modifier.height(height),
+        shape = shape,
+        color = containerColor,
+        border = BorderStroke(
+            width = if (focused) 1.2.dp else OrbitControlTokens.HairlineWidth,
+            color = if (focused) focusedBorderColor else borderColor
+        ),
+        shadowElevation = shadowElevation
+    ) {
+        Box(contentAlignment = Alignment.CenterStart) {
+            content()
         }
     }
-}
-
-@Composable
-fun OrbitActionPill(
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    leadingIcon: ImageVector? = null
-) {
-    OrbitSegmentPill(
-        label = label,
-        selected = false,
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        leadingIcon = leadingIcon
-    )
 }

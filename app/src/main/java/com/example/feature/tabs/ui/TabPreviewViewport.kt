@@ -60,15 +60,6 @@ internal fun TabPreviewViewport(
     modifier: Modifier = Modifier
 ) {
     when {
-        previewBitmap != null -> {
-            val imageBitmap = remember(previewBitmap) { previewBitmap.asImageBitmap() }
-            Image(
-                bitmap = imageBitmap,
-                contentDescription = tab.title,
-                contentScale = ContentScale.Crop,
-                modifier = modifier
-            )
-        }
         isStartPage -> {
             StartPageMiniPreview(
                 isIncognito = tab.isIncognito,
@@ -76,6 +67,15 @@ internal fun TabPreviewViewport(
                 backgroundMode = startBackgroundMode,
                 wallpaperUri = startWallpaperUri,
                 compact = false,
+                modifier = modifier
+            )
+        }
+        previewBitmap != null -> {
+            val imageBitmap = remember(previewBitmap) { previewBitmap.asImageBitmap() }
+            Image(
+                bitmap = imageBitmap,
+                contentDescription = tab.title,
+                contentScale = ContentScale.Crop,
                 modifier = modifier
             )
         }

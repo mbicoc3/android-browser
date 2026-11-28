@@ -10,8 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -28,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
+import com.example.core.ui.components.OrbitFloatingActionButton
 import com.example.core.ui.components.OrbitSectionHeader
 import com.example.core.ui.components.OrbitSettingSwitchRow
 import com.example.core.ui.components.OrbitSurfaceCard
@@ -62,12 +61,12 @@ fun ShieldScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            OrbitFloatingActionButton(
                 onClick = { showAddDialog = true },
+                icon = Icons.Rounded.Add,
+                contentDescription = "Add custom filter rule",
                 modifier = Modifier.testTag("shield_add_rule_fab")
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = "Add custom filter rule")
-            }
+            )
         }
     ) { innerPadding ->
         LazyColumn(
@@ -95,7 +94,6 @@ fun ShieldScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Network Ad & Tracker Blocking",
-                    subtitle = "Intercept EasyPrivacy, AdGuard & custom host requests",
                     icon = Icons.Rounded.Shield,
                     checked = state.trackerShieldEnabled,
                     onCheckedChange = viewModel::setTrackerShieldEnabled,
@@ -106,7 +104,6 @@ fun ShieldScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Cosmetic Element Filtering",
-                    subtitle = "Hide empty ad containers & sponsored widgets via CSS injection",
                     icon = Icons.Rounded.AutoFixHigh,
                     checked = state.cosmeticFilteringEnabled,
                     onCheckedChange = viewModel::setCosmeticFilteringEnabled,

@@ -20,6 +20,8 @@ import com.example.feature.bookmarks.viewmodel.BookmarksViewModel
 import com.example.feature.browser.ui.BrowserScreen
 import com.example.feature.browser.viewmodel.BrowserViewModel
 import com.example.feature.browser.webview.OrbitWebViewPool
+import com.example.feature.collections.ui.ImageCollectionsScreen
+import com.example.feature.collections.viewmodel.ImageCollectionsViewModel
 import com.example.feature.downloads.ui.DownloadsScreen
 import com.example.feature.downloads.viewmodel.DownloadsViewModel
 import com.example.feature.history.ui.HistoryScreen
@@ -80,6 +82,15 @@ fun OrbitNavHost(
                 onSaveBookmark = { title, url ->
                     coroutineScope.launch {
                         container.bookmarkRepository.addOrUpdate(title, url)
+                    }
+                },
+                onCollectImage = { title, imageUrl, sourcePageUrl ->
+                    coroutineScope.launch {
+                        container.imageCollectionRepository.collectImage(
+                            title = title,
+                            imageUrl = imageUrl,
+                            sourcePageUrl = sourcePageUrl
+                        )
                     }
                 },
                 onSaveOfflinePage = { webView, title, url ->
@@ -156,6 +167,27 @@ fun OrbitNavHost(
                 onOpenUrl = { url ->
                     browserViewModel.loadUrlInActiveTab(url)
                     navController.popBackStack(BrowserRoutes.BROWSER, inclusive = false)
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(BrowserRoutes.IMAGE_COLLECTIONS) {
+            val vm: ImageCollectionsViewModel = viewModel(factory = container.imageCollectionsViewModelFactory())
+            ImageCollectionsScreen(
+                viewModel = vm,
+                onOpenUrl = { url ->
+                    browserViewModel.loadUrlInActiveTab(url)
+                    navController.popBackStack(BrowserRoutes.BROWSER, inclusive = false)
+                },
+                onDownloadUrl = { url ->
+                    val fileName = android.webkit.URLUtil.guessFileName(url, null, null)
+                    coroutineScope.launch {
+                        container.downloadRepository.enqueueDownload(
+                            url = url,
+                            suggestedFileName = fileName
+                        )
+                    }
                 },
                 onBack = { navController.popBackStack() }
             )

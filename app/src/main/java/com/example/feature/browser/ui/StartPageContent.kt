@@ -69,10 +69,15 @@ import com.example.core.ui.components.OrbitSegmentPill
 import com.example.core.ui.components.OrbitTextField
 import com.example.core.ui.theme.OrbitDarkOutline
 import com.example.core.ui.theme.OrbitDarkSolidStartBg
+import com.example.core.ui.theme.OrbitLightDotInactive
 import com.example.core.ui.theme.OrbitLightOutline
 import com.example.core.ui.theme.OrbitLightPrimary
 import com.example.core.ui.theme.OrbitLightSolidStartBg
 import com.example.core.ui.theme.OrbitSpacing
+import com.example.core.ui.theme.OrbitWallpaperScrimBottom
+import com.example.core.ui.theme.OrbitWallpaperScrimLow
+import com.example.core.ui.theme.OrbitWallpaperScrimMid
+import com.example.core.ui.theme.OrbitWallpaperScrimTop
 import com.example.core.ui.theme.isOrbitDarkTheme
 import com.example.feature.browser.model.SpeedDialShortcut
 import kotlinx.coroutines.launch
@@ -164,10 +169,10 @@ fun StartPageContent(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0.0f to Color(0x28000000),
-                            0.48f to Color(0x3D000000),
-                            0.78f to Color(0x8818181A),
-                            1.0f to Color(0xAD18181A)
+                            0.0f to OrbitWallpaperScrimTop,
+                            0.48f to OrbitWallpaperScrimMid,
+                            0.78f to OrbitWallpaperScrimLow,
+                            1.0f to OrbitWallpaperScrimBottom
                         )
                     )
             )
@@ -346,7 +351,7 @@ fun StartPageContent(
                                         when {
                                             active && isLightSolidSurface -> OrbitLightPrimary
                                             active -> Color.White
-                                            isLightSolidSurface -> Color(0xFFB4B4BD)
+                                            isLightSolidSurface -> OrbitLightDotInactive
                                             else -> Color.White.copy(alpha = 0.35f)
                                         }
                                     )

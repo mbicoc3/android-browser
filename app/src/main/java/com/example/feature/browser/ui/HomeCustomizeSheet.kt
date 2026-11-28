@@ -3,23 +3,13 @@ package com.example.feature.browser.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.FormatColorFill
 import androidx.compose.material.icons.rounded.Image
@@ -28,9 +18,7 @@ import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SettingsBrightness
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,13 +27,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.core.datastore.AppThemeMode
@@ -57,14 +41,12 @@ import com.example.core.ui.components.OrbitModalBottomSheet
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSegmentPill
+import com.example.core.ui.components.OrbitSelectableOptionCard
 import com.example.core.ui.components.OrbitSheetHeader
 import com.example.core.ui.components.OrbitSheetKicker
-import com.example.core.ui.components.OrbitSheetPanel
 import com.example.core.ui.components.OrbitSheetSecondaryButton
 import com.example.core.ui.components.OrbitSheetSegmentPill
 import com.example.core.ui.components.OrbitTextField
-import com.example.core.ui.theme.OrbitDarkSolidStartBg
-import com.example.core.ui.theme.OrbitLightSolidStartBg
 import com.example.feature.browser.repository.WallpaperStorageHelper
 import kotlinx.coroutines.launch
 
@@ -94,7 +76,8 @@ fun HomeCustomizeSheet(
     OrbitModalBottomSheet(onDismissRequest = onDismiss) {
         OrbitSheetHeader(
             title = "Customize",
-            icon = Icons.Rounded.Palette
+            icon = Icons.Rounded.Palette,
+            iconTint = MaterialTheme.colorScheme.onSurface
         )
 
         OrbitSheetKicker(text = "Theme")
@@ -126,21 +109,19 @@ fun HomeCustomizeSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            BackgroundModeOption(
+            OrbitSelectableOptionCard(
                 title = "Solid",
                 icon = Icons.Rounded.FormatColorFill,
                 selected = backgroundMode == StartBackgroundMode.SOLID,
-                isWallpaperPreview = false,
                 onClick = { onBackgroundModeSelected(StartBackgroundMode.SOLID) },
                 modifier = Modifier
                     .weight(1f)
                     .testTag("customize_bg_solid")
             )
-            BackgroundModeOption(
+            OrbitSelectableOptionCard(
                 title = "Image",
                 icon = Icons.Rounded.Image,
                 selected = backgroundMode == StartBackgroundMode.IMAGE,
-                isWallpaperPreview = true,
                 onClick = { onBackgroundModeSelected(StartBackgroundMode.IMAGE) },
                 modifier = Modifier
                     .weight(1f)
@@ -213,91 +194,6 @@ fun HomeCustomizeSheet(
     }
 }
 
-@Composable
-private fun BackgroundModeOption(
-    title: String,
-    icon: ImageVector,
-    selected: Boolean,
-    isWallpaperPreview: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val primary = MaterialTheme.colorScheme.primary
-    val secondary = MaterialTheme.colorScheme.secondary
-    OrbitSheetPanel(
-        selected = selected,
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(9.dp))
-                    .background(
-                        if (isWallpaperPreview) {
-                            Brush.linearGradient(
-                                listOf(
-                                    primary.copy(alpha = 0.78f),
-                                    secondary.copy(alpha = 0.68f)
-                                )
-                            )
-                        } else {
-                            Brush.linearGradient(
-                                listOf(
-                                    OrbitLightSolidStartBg,
-                                    OrbitDarkSolidStartBg
-                                )
-                            )
-                        }
-                    )
-                    .border(
-                        width = 0.8.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(9.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (isWallpaperPreview) MaterialTheme.colorScheme.onPrimary else primary,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(CircleShape)
-                        .background(primary.copy(alpha = 0.16f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Check,
-                        contentDescription = "Selected",
-                        tint = primary,
-                        modifier = Modifier.size(13.dp)
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun SetWallpaperUrlDialog(

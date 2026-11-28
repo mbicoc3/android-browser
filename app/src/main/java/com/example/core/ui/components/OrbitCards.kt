@@ -1,28 +1,36 @@
 package com.example.core.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.core.ui.theme.OrbitSpacing
@@ -34,7 +42,7 @@ fun OrbitSectionHeader(
 ) {
     Text(
         text = title,
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier.padding(horizontal = OrbitSpacing.xs, vertical = 2.dp)
     )
@@ -43,109 +51,203 @@ fun OrbitSectionHeader(
 @Composable
 fun OrbitSurfaceCard(
     modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val colors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f)
+    val palette = rememberOrbitSurfacePalette()
+    val resolvedBg by animateColorAsState(
+        targetValue = when {
+            containerColor != null -> containerColor
+            selected -> palette.activeFill
+            else -> palette.panel
+        },
+        animationSpec = tween(160),
+        label = "surface_card_bg"
     )
-    val border = BorderStroke(
-        width = OrbitControlTokens.HairlineWidth,
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+    val resolvedBorder = BorderStroke(
+        width = if (selected) 1.4.dp else OrbitControlTokens.HairlineWidth,
+        color = if (selected) accentColor else palette.hairline
     )
+    val colors = CardDefaults.cardColors(containerColor = resolvedBg)
+    val shape = RoundedCornerShape(OrbitControlTokens.CardCornerRadius)
+
     if (onClick != null) {
         Card(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
+            shape = shape,
             colors = colors,
-            border = border,
+            border = resolvedBorder,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             content = content
         )
     } else {
         Card(
             modifier = modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
+            shape = shape,
             colors = colors,
-            border = border,
+            border = resolvedBorder,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             content = content
         )
     }
 }
 
 @Composable
-fun OrbitSettingSwitchRow(
+fun OrbitSelectableOptionCard(
     title: String,
-    subtitle: String,
-    icon: ImageVector,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    testTag: String,
-    modifier: Modifier = Modifier
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    leadingContent: (@Composable () -> Unit)? = null,
+    trailingBadgeText: String? = null
 ) {
-    OrbitSurfaceCard(
-        modifier = modifier,
-        onClick = { onCheckedChange(!checked) }
+    OrbitSheetPanel(
+        selected = selected,
+        onClick = onClick,
+        accentColor = accentColor,
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .defaultMinSize(minHeight = 46.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (leadingContent != null) {
+                leadingContent()
+            } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = if (selected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(OrbitSpacing.sm))
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (!subtitle.isNullOrBlank()) {
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(OrbitSpacing.sm))
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                modifier = Modifier.testTag(testTag)
-            )
+
+            if (!trailingBadgeText.isNullOrBlank()) {
+                OrbitBadgeChip(
+                    text = trailingBadgeText,
+                    accentColor = if (selected) accentColor else null
+                )
+            } else if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Check,
+                        contentDescription = "Selected",
+                        tint = accentColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun OrbitBadgeChip(
+fun OrbitNoticeBanner(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    onClick: (() -> Unit)? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(6.dp),
-        color = MaterialTheme.colorScheme.primaryContainer
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
+    val palette = rememberOrbitSurfacePalette()
+    val bannerSurface = @Composable {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (!subtitle.isNullOrBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            if (trailing != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = trailing
+                )
+            }
+        }
+    }
+
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(OrbitControlTokens.ControlCornerRadius),
+            color = palette.panel,
+            border = BorderStroke(OrbitControlTokens.HairlineWidth, accentColor.copy(alpha = 0.42f))
+        ) {
+            bannerSurface()
+        }
+    } else {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(OrbitControlTokens.ControlCornerRadius),
+            color = palette.panel,
+            border = BorderStroke(OrbitControlTokens.HairlineWidth, accentColor.copy(alpha = 0.42f))
+        ) {
+            bannerSurface()
+        }
     }
 }

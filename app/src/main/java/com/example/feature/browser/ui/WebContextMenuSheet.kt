@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.BookmarkAdd
+import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Email
@@ -57,6 +59,7 @@ import com.example.core.ui.components.OrbitSheetActionRow
 import com.example.core.ui.components.OrbitSheetBentoTile
 import com.example.core.ui.components.OrbitSheetHairlineDivider
 import com.example.core.ui.components.OrbitSheetPanel
+import com.example.core.ui.components.rememberOrbitSurfacePalette
 import com.example.core.ui.theme.OrbitIncognitoPurple
 import com.example.core.ui.theme.OrbitMonoStyle
 import com.example.feature.browser.model.ContextTargetKind
@@ -72,6 +75,7 @@ fun WebContextMenuSheet(
     onDownloadUrl: (String) -> Unit,
     onSetAsBackgroundImage: (String) -> Unit,
     onSaveBookmark: (title: String, url: String) -> Unit,
+    onCollectImage: (title: String, imageUrl: String) -> Unit = { _, _ -> },
     onPinToHome: (title: String, url: String) -> Unit,
     onShowMessage: (String) -> Unit,
     onDismiss: () -> Unit
@@ -194,7 +198,6 @@ fun WebContextMenuSheet(
                     } else {
                         stringResource(R.string.ctx_copy_image_link)
                     },
-                    subtitle = UrlUtils.extractHost(primaryUrl),
                     icon = Icons.Rounded.ContentCopy,
                     modifier = Modifier.testTag("ctx_copy_link"),
                     onClick = {
@@ -208,7 +211,6 @@ fun WebContextMenuSheet(
                 if (primaryUrl != null) OrbitSheetHairlineDivider()
                 OrbitSheetActionRow(
                     title = stringResource(R.string.ctx_copy_link_text),
-                    subtitle = copyableText,
                     icon = Icons.Rounded.TextFields,
                     modifier = Modifier.testTag("ctx_copy_link_text"),
                     onClick = {
@@ -223,7 +225,6 @@ fun WebContextMenuSheet(
             }
             OrbitSheetActionRow(
                 title = stringResource(R.string.ctx_select_text),
-                subtitle = stringResource(R.string.ctx_select_text_subtitle),
                 icon = Icons.Rounded.SelectAll,
                 modifier = Modifier.testTag("ctx_select_text"),
                 onClick = {
@@ -235,7 +236,6 @@ fun WebContextMenuSheet(
                 OrbitSheetHairlineDivider()
                 OrbitSheetActionRow(
                     title = stringResource(R.string.ctx_search_text),
-                    subtitle = "\"$copyableText\"",
                     icon = Icons.Rounded.Search,
                     modifier = Modifier.testTag("ctx_search_text"),
                     onClick = {
@@ -251,8 +251,21 @@ fun WebContextMenuSheet(
                 var needsDivider = false
                 if (imageUrl != null) {
                     OrbitSheetActionRow(
+                        title = stringResource(R.string.ctx_collect_image),
+                        icon = Icons.Rounded.CollectionsBookmark,
+                        modifier = Modifier.testTag("ctx_collect_image"),
+                        onClick = {
+                            onCollectImage(
+                                target.imageAlt?.takeIf { it.isNotBlank() } ?: UrlUtils.extractHost(imageUrl),
+                                imageUrl
+                            )
+                            onShowMessage(context.getString(R.string.msg_collected_image))
+                            onDismiss()
+                        }
+                    )
+                    OrbitSheetHairlineDivider()
+                    OrbitSheetActionRow(
                         title = stringResource(R.string.ctx_save_image),
-                        subtitle = stringResource(R.string.ctx_save_downloads_subtitle),
                         icon = Icons.Rounded.Image,
                         modifier = Modifier.testTag("ctx_save_image"),
                         onClick = {
@@ -263,7 +276,6 @@ fun WebContextMenuSheet(
                     OrbitSheetHairlineDivider()
                     OrbitSheetActionRow(
                         title = stringResource(R.string.ctx_set_background_image),
-                        subtitle = stringResource(R.string.ctx_set_background_subtitle),
                         icon = Icons.Rounded.Wallpaper,
                         modifier = Modifier.testTag("ctx_set_background_image"),
                         onClick = {
@@ -277,7 +289,6 @@ fun WebContextMenuSheet(
                     if (needsDivider) OrbitSheetHairlineDivider()
                     OrbitSheetActionRow(
                         title = stringResource(R.string.ctx_download_link),
-                        subtitle = stringResource(R.string.ctx_save_downloads_subtitle),
                         icon = Icons.Rounded.Download,
                         modifier = Modifier.testTag("ctx_download_link"),
                         onClick = {
@@ -288,7 +299,6 @@ fun WebContextMenuSheet(
                     OrbitSheetHairlineDivider()
                     OrbitSheetActionRow(
                         title = stringResource(R.string.ctx_save_bookmark),
-                        subtitle = stringResource(R.string.ctx_save_bookmark_subtitle),
                         icon = Icons.Rounded.BookmarkAdd,
                         modifier = Modifier.testTag("ctx_save_bookmark"),
                         onClick = {
@@ -300,7 +310,6 @@ fun WebContextMenuSheet(
                     OrbitSheetHairlineDivider()
                     OrbitSheetActionRow(
                         title = stringResource(R.string.ctx_pin_to_home),
-                        subtitle = stringResource(R.string.ctx_pin_to_home_subtitle),
                         icon = Icons.Rounded.PushPin,
                         modifier = Modifier.testTag("ctx_pin_speed_dial"),
                         onClick = {
@@ -329,7 +338,9 @@ fun WebContextMenuSheet(
 
 @Composable
 private fun ContextTargetHeaderCard(target: WebContextMenuTarget) {
-    val primary = MaterialTheme.colorScheme.primary
+    val palette = rememberOrbitSurfacePalette()
+    val hasImage = !target.imageUrl.isNullOrBlank()
+    val containerShape = if (hasImage) RoundedCornerShape(14.dp) else CircleShape
     OrbitSheetPanel {
         Row(
             modifier = Modifier
@@ -340,13 +351,13 @@ private fun ContextTargetHeaderCard(target: WebContextMenuTarget) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(primary.copy(alpha = 0.14f))
-                    .border(0.8.dp, primary.copy(alpha = 0.25f), RoundedCornerShape(14.dp)),
+                    .size(if (hasImage) 50.dp else 40.dp)
+                    .clip(containerShape)
+                    .background(palette.tile)
+                    .border(0.8.dp, palette.hairline, containerShape),
                 contentAlignment = Alignment.Center
             ) {
-                if (!target.imageUrl.isNullOrBlank()) {
+                if (hasImage) {
                     AsyncImage(
                         model = target.imageUrl,
                         contentDescription = target.imageAlt ?: target.linkText,
@@ -364,8 +375,8 @@ private fun ContextTargetHeaderCard(target: WebContextMenuTarget) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = primary,
-                        modifier = Modifier.size(22.dp)
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

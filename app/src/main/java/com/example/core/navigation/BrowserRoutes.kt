@@ -8,6 +8,7 @@ object BrowserRoutes {
     const val BROWSER = "browser"
     const val TABS = "tabs"
     const val BOOKMARKS = "bookmarks"
+    const val IMAGE_COLLECTIONS = "image_collections"
     const val HISTORY = "history"
     const val DOWNLOADS = "downloads"
     const val OFFLINE_PAGES = "offline_pages"

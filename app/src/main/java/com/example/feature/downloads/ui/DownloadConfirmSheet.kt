@@ -274,7 +274,6 @@ fun DownloadConfirmSheet(
         OrbitSheetPanel {
             OrbitSheetSwitchRow(
                 title = stringResource(R.string.downloads_wifi_only),
-                subtitle = stringResource(R.string.downloads_wifi_only_subtitle),
                 icon = Icons.Rounded.Wifi,
                 checked = wifiOnly,
                 onCheckedChange = { wifiOnly = it },
@@ -283,7 +282,6 @@ fun DownloadConfirmSheet(
             OrbitSheetHairlineDivider()
             OrbitSheetSwitchRow(
                 title = stringResource(R.string.downloads_confirm_toggle),
-                subtitle = stringResource(R.string.downloads_confirm_subtitle),
                 icon = Icons.Rounded.Download,
                 checked = askBeforeDownload,
                 onCheckedChange = {

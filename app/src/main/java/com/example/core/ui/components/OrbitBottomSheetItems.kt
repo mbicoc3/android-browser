@@ -20,15 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -50,87 +47,70 @@ fun OrbitSheetBentoTile(
     accentColor: Color = MaterialTheme.colorScheme.primary
 ) {
     val palette = rememberOrbitSheetPalette()
-    val containerColor by animateColorAsState(
+    val circleColor by animateColorAsState(
         targetValue = when {
-            !enabled -> palette.tile.copy(alpha = 0.42f)
-            selected -> accentColor.copy(alpha = if (palette.isDark) 0.18f else 0.13f)
+            !enabled -> palette.panel.copy(alpha = 0.55f)
+            selected -> palette.activeFill
             else -> palette.tile
         },
-        animationSpec = tween(180),
-        label = "bento_tile_bg"
+        animationSpec = tween(160),
+        label = "bento_circle_bg"
     )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> palette.hairline.copy(alpha = 0.4f)
-            selected -> accentColor.copy(alpha = 0.55f)
-            else -> palette.hairline
-        },
-        animationSpec = tween(180),
-        label = "bento_tile_border"
+    val ringColor by animateColorAsState(
+        targetValue = if (selected && enabled) accentColor.copy(alpha = 0.72f) else Color.Transparent,
+        animationSpec = tween(160),
+        label = "bento_circle_ring"
     )
-    val badgeBg = when {
-        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.08f)
-        selected -> accentColor.copy(alpha = 0.24f)
-        else -> accentColor.copy(alpha = if (palette.isDark) 0.13f else 0.10f)
-    }
 
     Surface(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.defaultMinSize(minHeight = 56.dp),
-        shape = RoundedCornerShape(13.dp),
-        color = containerColor,
-        border = BorderStroke(width = if (selected) 1.dp else OrbitControlTokens.HairlineWidth, color = borderColor)
+        modifier = modifier.defaultMinSize(minHeight = 62.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = Color.Transparent,
+        border = null
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 7.dp)
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            if (selected && enabled) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(accentColor)
-                )
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Surface(
+                shape = CircleShape,
+                color = circleColor,
+                border = if (selected && enabled) BorderStroke(1.2.dp, ringColor) else null,
+                modifier = Modifier.size(38.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(badgeBg),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = label,
-                        tint = if (enabled) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-                        modifier = Modifier.size(15.dp)
+                        tint = when {
+                            !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.36f)
+                            selected -> accentColor
+                            else -> MaterialTheme.colorScheme.onSurface
+                        },
+                        modifier = Modifier.size(19.dp)
                     )
                 }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
-                    ),
-                    color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.42f)
-                    },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
             }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                ),
+                color = if (enabled) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.42f)
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -142,31 +122,31 @@ fun OrbitSheetActionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
+    iconTint: Color = MaterialTheme.colorScheme.onSurface,
     trailing: (@Composable () -> Unit)? = null
 ) {
     val palette = rememberOrbitSheetPalette()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 42.dp)
+            .defaultMinSize(minHeight = 46.dp)
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(iconTint.copy(alpha = if (palette.isDark) 0.14f else 0.10f)),
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(palette.tile),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(15.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -196,12 +176,12 @@ fun OrbitSheetActionRow(
 @Composable
 fun OrbitSheetSwitchRow(
     title: String,
-    subtitle: String,
     icon: ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     testTag: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     enabled: Boolean = true,
     activeTint: Color = MaterialTheme.colorScheme.primary
 ) {
@@ -215,37 +195,29 @@ fun OrbitSheetSwitchRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 42.dp)
+            .defaultMinSize(minHeight = 46.dp)
             .clickable(enabled = enabled) { onCheckedChange(!checked) }
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(
-                        effectiveTint.copy(
-                            alpha = when {
-                                !enabled -> 0.07f
-                                checked -> if (palette.isDark) 0.18f else 0.13f
-                                else -> if (palette.isDark) 0.10f else 0.08f
-                            }
-                        )
-                    ),
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(palette.tile),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = effectiveTint,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
             Column {
@@ -260,7 +232,7 @@ fun OrbitSheetSwitchRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (subtitle.isNotBlank()) {
+                if (!subtitle.isNullOrBlank()) {
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.labelSmall,
@@ -272,17 +244,12 @@ fun OrbitSheetSwitchRow(
             }
         }
         Spacer(modifier = Modifier.width(OrbitSpacing.xs))
-        Switch(
+        OrbitSwitch(
             checked = checked,
             enabled = enabled,
+            activeTint = activeTint,
             onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = activeTint
-            ),
-            modifier = Modifier
-                .scale(0.82f)
-                .testTag(testTag)
+            modifier = Modifier.testTag(testTag)
         )
     }
 }

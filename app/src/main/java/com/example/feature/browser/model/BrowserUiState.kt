@@ -3,6 +3,7 @@ package com.example.feature.browser.model
 import androidx.compose.ui.graphics.Color
 import com.example.core.common.UrlUtils
 import com.example.core.datastore.BrowserPreferences
+import com.example.core.ui.theme.OrbitSpeedDialFallbackBg
 import com.example.feature.sandbox.model.SandboxModel
 
 data class DirectImageInfo(
@@ -58,7 +59,7 @@ data class SpeedDialShortcut(
     val accentColor: Color,
     val iconPath: String = "",
     val collectionIndex: Int = 0,
-    val containerColor: Color = Color(0xFF1E293B)
+    val containerColor: Color = OrbitSpeedDialFallbackBg
 )
 
 sealed interface WebCommand {

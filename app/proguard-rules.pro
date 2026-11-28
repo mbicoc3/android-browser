@@ -1,21 +1,40 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Orbit Browser R8 / ProGuard rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# WebView @JavascriptInterface bridges
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keepattributes JavascriptInterface
+-keep class com.example.feature.sitedata.engine.OrbitSiteDataBridge$JsReceiver {
+    public <methods>;
+}
+-keep class com.example.feature.passwords.autofill.WebFormInspector$JsBridge {
+    public <methods>;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# JNI native adblock-rust bridge
+-keepclasseswithmembernames,includedescriptorclasses class com.example.feature.shield.engine.NativeAdblockBridge {
+    native <methods>;
+}
+
+# Moshi & Retrofit DTOs
+-keepclassmembers class * {
+    @com.squareup.moshi.JsonClass <methods>;
+}
+-keep class com.example.feature.sitedata.engine.**JsonAdapter { *; }
+-keep class com.example.core.network.**JsonAdapter { *; }
+-keepclassmembers class com.example.core.network.** { *; }
+-keepclassmembers class com.example.feature.sitedata.engine.**Dto { *; }
+
+# Retrofit & OkHttp optional platform annotations
+-dontwarn retrofit2.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
+-dontwarn org.bouncycastle.**

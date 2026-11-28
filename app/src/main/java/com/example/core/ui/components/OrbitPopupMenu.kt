@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,7 +44,7 @@ fun OrbitPopupMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         offset = offset,
-        modifier = modifier.widthIn(min = 216.dp, max = 264.dp),
+        modifier = modifier.widthIn(min = 224.dp, max = 272.dp),
         shape = RoundedCornerShape(OrbitControlTokens.PopupCornerRadius),
         containerColor = palette.canvas,
         tonalElevation = 0.dp,
@@ -69,21 +71,21 @@ fun OrbitPopupMenuItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = OrbitControlTokens.ControlHeight)
+            .heightIn(min = 44.dp)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 5.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(26.dp)
-                .clip(RoundedCornerShape(7.dp))
+                .size(28.dp)
+                .clip(CircleShape)
                 .background(
                     if (active && enabled) {
-                        iconTint.copy(alpha = if (palette.isDark) 0.18f else 0.13f)
+                        iconTint.copy(alpha = if (palette.isDark) 0.16f else 0.11f)
                     } else {
-                        palette.tile.copy(alpha = if (enabled) 0.72f else 0.35f)
+                        palette.tile.copy(alpha = if (enabled) 0.9f else 0.45f)
                     }
                 ),
             contentAlignment = Alignment.Center
@@ -116,4 +118,14 @@ fun OrbitPopupMenuItem(
             )
         }
     }
+}
+
+@Composable
+fun OrbitPopupMenuDivider(modifier: Modifier = Modifier) {
+    val palette = rememberOrbitSurfacePalette()
+    HorizontalDivider(
+        modifier = modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        thickness = 0.6.dp,
+        color = palette.innerDivider
+    )
 }

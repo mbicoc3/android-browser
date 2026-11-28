@@ -33,7 +33,6 @@ import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -50,9 +49,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.BuildConfig
 import com.example.R
 import com.example.core.common.SearchEngine
 import com.example.core.ui.components.OrbitPrimaryButton
+import com.example.core.ui.components.OrbitRadioOptionRow
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSectionHeader
 import com.example.core.ui.components.OrbitSettingSwitchRow
@@ -100,7 +101,7 @@ fun SettingsScreen(
         topBar = {
             OrbitTopBar(
                 title = stringResource(R.string.settings_title),
-                subtitle = "DataStore Preferences · WebKit Engine",
+                subtitle = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · WebKit Engine",
                 onBackClick = onBack
             )
         }
@@ -117,29 +118,18 @@ fun SettingsScreen(
             }
             item {
                 OrbitSurfaceCard {
-                    Column(modifier = Modifier.padding(vertical = OrbitSpacing.xs)) {
+                    Column(modifier = Modifier.padding(OrbitSpacing.xs)) {
                         com.example.core.datastore.AppThemeMode.entries.forEach { mode ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = OrbitSpacing.md, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = prefs.themeMode == mode,
-                                    onClick = { viewModel.setThemeMode(mode) },
-                                    modifier = Modifier.testTag("theme_mode_${mode.name.lowercase()}")
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (mode == com.example.core.datastore.AppThemeMode.LIGHT) {
-                                        "${mode.displayName} (Default)"
-                                    } else {
-                                        mode.displayName
-                                    },
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
+                            OrbitRadioOptionRow(
+                                title = if (mode == com.example.core.datastore.AppThemeMode.LIGHT) {
+                                    "${mode.displayName} (Default)"
+                                } else {
+                                    mode.displayName
+                                },
+                                selected = prefs.themeMode == mode,
+                                onClick = { viewModel.setThemeMode(mode) },
+                                radioTestTag = "theme_mode_${mode.name.lowercase()}"
+                            )
                         }
                     }
                 }
@@ -222,38 +212,16 @@ fun SettingsScreen(
             }
             item {
                 OrbitSurfaceCard {
-                    Column(modifier = Modifier.padding(vertical = OrbitSpacing.xs)) {
+                    Column(modifier = Modifier.padding(OrbitSpacing.xs)) {
                         SearchEngine.entries.forEach { engine ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = OrbitSpacing.md, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = prefs.searchEngine == engine,
-                                    onClick = { viewModel.setSearchEngine(engine) },
-                                    modifier = Modifier.testTag("search_engine_${engine.id}")
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                    imageVector = Icons.Rounded.Search,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = engine.displayName,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = engine.homeUrl,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                            OrbitRadioOptionRow(
+                                title = engine.displayName,
+                                subtitle = engine.homeUrl,
+                                leadingIcon = Icons.Rounded.Search,
+                                selected = prefs.searchEngine == engine,
+                                onClick = { viewModel.setSearchEngine(engine) },
+                                radioTestTag = "search_engine_${engine.id}"
+                            )
                         }
                     }
                 }
@@ -265,7 +233,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Tracker & Ad Shield",
-                    subtitle = "Intercept EasyPrivacy, AdGuard & custom rules in WebView",
                     icon = Icons.Rounded.Shield,
                     checked = prefs.blockTrackers,
                     onCheckedChange = viewModel::setBlockTrackers,
@@ -275,7 +242,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Cosmetic Element Filtering",
-                    subtitle = "Hide ad placeholders & sponsored slots on pages",
                     icon = Icons.Rounded.AutoFixHigh,
                     checked = prefs.cosmeticFilteringEnabled,
                     onCheckedChange = viewModel::setCosmeticFilteringEnabled,
@@ -326,7 +292,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Enable JavaScript",
-                    subtitle = "Allow interactive web scripts on visited pages",
                     icon = Icons.Rounded.Code,
                     checked = prefs.javaScriptEnabled,
                     onCheckedChange = viewModel::setJavaScriptEnabled,
@@ -336,7 +301,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Clear History on Exit",
-                    subtitle = "Automatically purge history when closing the app",
                     icon = Icons.Rounded.DeleteSweep,
                     checked = prefs.clearHistoryOnExit,
                     onCheckedChange = viewModel::setClearHistoryOnExit,
@@ -352,17 +316,11 @@ fun SettingsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(OrbitSpacing.md),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                            .padding(OrbitSpacing.md)
                     ) {
                         Text(
                             text = "Active Backend: ${WebEngineBackend.ANDROID_SYSTEM_WEBVIEW.displayName}",
                             style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "Wrapped behind WebEngineSession abstraction for clean future migration to Embedded Chromium / ContentShell.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -370,7 +328,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Force Dark Web Pages",
-                    subtitle = "Use AndroidX WebKit algorithmic darkening on bright sites",
                     icon = Icons.Rounded.DarkMode,
                     checked = prefs.forceDarkWeb,
                     onCheckedChange = viewModel::setForceDarkWeb,
@@ -380,7 +337,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Desktop Mode by Default",
-                    subtitle = "Open new tabs with desktop user-agent viewport",
                     icon = Icons.Rounded.DesktopWindows,
                     checked = prefs.desktopModeDefault,
                     onCheckedChange = viewModel::setDesktopModeDefault,
@@ -390,7 +346,6 @@ fun SettingsScreen(
             item {
                 OrbitSettingSwitchRow(
                     title = "Tab Card Previews",
-                    subtitle = "Capture lightweight thumbnails for Card View tabs (clears cache when off)",
                     icon = Icons.Rounded.PhotoLibrary,
                     checked = prefs.tabPreviewEnabled,
                     onCheckedChange = viewModel::setTabPreviewEnabled,
@@ -409,11 +364,6 @@ fun SettingsScreen(
                             .padding(OrbitSpacing.md),
                         verticalArrangement = Arrangement.spacedBy(OrbitSpacing.sm)
                     ) {
-                        Text(
-                            text = "Inspect & selectively clear Cookies, Local Storage, Session Storage, IndexedDB, and Cache per site or globally.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                         OrbitSecondaryButton(
                             text = "Downloads (${prefs.downloadFolderLabel} · ${prefs.downloadChunkCount}x)",
                             icon = Icons.Rounded.Download,
@@ -429,11 +379,6 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("settings_open_site_data_button")
-                        )
-                        Text(
-                            text = "Periodic WorkManager maintenance trims history older than 30 days and cleans temporary cache files.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         OrbitPrimaryButton(
                             text = stringResource(R.string.settings_run_cleanup),
@@ -484,6 +429,34 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("settings_clear_crash_logs_button")
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                OrbitSectionHeader(title = "About Orbit")
+            }
+            item {
+                OrbitSurfaceCard {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(OrbitSpacing.md),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = "Orbit Browser",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Version ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.testTag("settings_app_version_text")
                             )
                         }
                     }

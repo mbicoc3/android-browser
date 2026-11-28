@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
 import com.example.core.database.entity.DownloadStatus
 import com.example.core.ui.components.OrbitEmptyState
+import com.example.core.ui.components.OrbitFloatingActionButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSegmentPill
 import com.example.core.ui.components.OrbitSurfaceCard
@@ -126,12 +126,12 @@ fun DownloadsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            OrbitFloatingActionButton(
                 onClick = { showNewDownloadSheet = true },
+                icon = Icons.Rounded.Add,
+                contentDescription = stringResource(R.string.downloads_new),
                 modifier = Modifier.testTag("add_download_fab")
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.downloads_new))
-            }
+            )
         }
     ) { innerPadding ->
         Column(

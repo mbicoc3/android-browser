@@ -1,6 +1,5 @@
 package com.example.feature.browser.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bookmark
@@ -38,7 +36,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -58,6 +55,7 @@ import com.example.core.ui.components.OrbitActionPill
 import com.example.core.ui.components.OrbitBadgeChip
 import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitSegmentPill
+import com.example.core.ui.components.OrbitSurfaceCard
 import com.example.core.ui.theme.OrbitEmerald
 import com.example.core.ui.theme.OrbitMonoStyle
 import com.example.core.ui.theme.OrbitSpacing
@@ -70,6 +68,7 @@ data class OmniboxMultiPurposeCallbacks(
     val onPasteAndGo: (String) -> Unit,
     val onCopyCurrentUrl: () -> Unit,
     val onDownloadCurrentUrl: () -> Unit,
+    val onCollectCurrentImageUrl: () -> Unit = {},
     val onShareCurrentUrl: () -> Unit,
     val onInspectSiteData: () -> Unit,
     val onFindInPage: (String) -> Unit,
@@ -126,21 +125,20 @@ fun OmniboxMultiPurposePanel(
         if (!isStartPage && directImage != null) {
             DirectImageDetailCard(
                 info = directImage,
+                onCollect = callbacks.onCollectCurrentImageUrl,
                 onDownload = callbacks.onDownloadCurrentUrl,
                 onCopyUrl = callbacks.onCopyCurrentUrl
             )
         }
 
         if (smartAnswer != null) {
-            Surface(
+            OrbitSurfaceCard(
+                selected = true,
+                accentColor = MaterialTheme.colorScheme.secondary,
+                onClick = { callbacks.onCopyText(smartAnswer.value) },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = OrbitSpacing.sm, vertical = 6.dp)
-                    .clickable { callbacks.onCopyText(smartAnswer.value) }
-                    .testTag("omnibox_smart_answer_card"),
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f))
+                    .testTag("omnibox_smart_answer_card")
             ) {
                 Row(
                     modifier = Modifier
@@ -160,12 +158,12 @@ fun OmniboxMultiPurposePanel(
                             text = smartAnswer.value,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = smartAnswer.subtitle,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -288,17 +286,16 @@ fun OmniboxMultiPurposePanel(
 @Composable
 private fun DirectImageDetailCard(
     info: DirectImageInfo,
+    onCollect: () -> Unit,
     onDownload: () -> Unit,
     onCopyUrl: () -> Unit
 ) {
-    Surface(
+    OrbitSurfaceCard(
+        selected = true,
+        accentColor = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .fillMaxWidth()
             .padding(horizontal = OrbitSpacing.sm, vertical = 6.dp)
-            .testTag("omnibox_direct_image_card"),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+            .testTag("omnibox_direct_image_card")
     ) {
         Row(
             modifier = Modifier
@@ -332,14 +329,20 @@ private fun DirectImageDetailCard(
                 )
             }
             OrbitGhostButton(
+                text = stringResource(R.string.collections_collect_action),
+                onClick = onCollect,
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                modifier = Modifier.testTag("omnibox_direct_image_collect_button")
+            )
+            OrbitGhostButton(
                 text = stringResource(R.string.omnibox_action_copy_url),
                 onClick = onCopyUrl,
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp)
             )
             OrbitGhostButton(
                 text = stringResource(R.string.omnibox_action_download),
                 onClick = onDownload,
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp)
             )
         }
     }

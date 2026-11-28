@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.R
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 interface PullRefreshCallbacks {
     fun onPullProgress(fraction: Float)
@@ -58,8 +57,9 @@ object OrbitPullRefreshMath {
 }
 
 /**
- * [WebView] subclass supporting native pull-down-to-refresh exclusively when scrolled to top
- * and enabled by the active web tab (never on the Start Page).
+ * [WebView] subclass supporting native pull-down-to-refresh ONLY when Chromium itself
+ * confirms the page (and any inner scrollable DOM containers) cannot scroll up further
+ * via [overScrollBy], preventing pull-to-refresh from hijacking upward page scrolling.
  */
 class OrbitPullRefreshWebView(context: Context) : WebView(context) {
 
@@ -74,20 +74,91 @@ class OrbitPullRefreshWebView(context: Context) : WebView(context) {
         }
 
     var pullRefreshCallbacks: PullRefreshCallbacks? = null
+    var onVisualContentInvalidated: (() -> Unit)? = null
 
+    private val density = resources.displayMetrics.density
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-    private val triggerThresholdPx = 112f * resources.displayMetrics.density
+    private val triggerThresholdPx = 112f * density
+    private val overscrollActivationThresholdPx = 6f * density
+    private val maxGestureLeadBeforeOverscrollPx = 56f * density
 
     private var downRawX = 0f
     private var downRawY = 0f
-    private var isTrackingPull = false
+    private var lastMoveRawX = 0f
+    private var lastMoveRawY = 0f
+    private var pullOriginRawY = 0f
+
+    private var isPointerDown = false
+    private var canEnterPullThisGesture = false
     private var isPullActive = false
+    private var sentCancelToSuper = false
+    private var overscrollAccumPx = 0f
     private var currentFraction = 0f
+
+    init {
+        overScrollMode = OVER_SCROLL_ALWAYS
+    }
+
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        super.onScrollChanged(l, t, oldl, oldt)
+        if (t > 0 || t != oldt) {
+            canEnterPullThisGesture = false
+        }
+        if (l != oldl || t != oldt) {
+            onVisualContentInvalidated?.invoke()
+        }
+    }
+
+    override fun overScrollBy(
+        deltaX: Int,
+        deltaY: Int,
+        scrollX: Int,
+        scrollY: Int,
+        scrollRangeX: Int,
+        scrollRangeY: Int,
+        maxOverScrollX: Int,
+        maxOverScrollY: Int,
+        isTouchEvent: Boolean
+    ): Boolean {
+        if (pullRefreshEnabled &&
+            isPointerDown &&
+            canEnterPullThisGesture &&
+            !isPullActive &&
+            isTouchEvent &&
+            scrollY <= 0 &&
+            deltaY < 0
+        ) {
+            val totalDx = lastMoveRawX - downRawX
+            val totalDy = lastMoveRawY - downRawY
+            if (totalDy > 0f && abs(totalDy) > abs(totalDx) * 1.2f) {
+                overscrollAccumPx += (-deltaY).toFloat()
+                if (overscrollAccumPx >= overscrollActivationThresholdPx) {
+                    isPullActive = true
+                    pullOriginRawY = lastMoveRawY
+                    currentFraction = 0f
+                    pullRefreshCallbacks?.onPullProgress(0f)
+                }
+            }
+        }
+        return super.overScrollBy(
+            deltaX,
+            deltaY,
+            scrollX,
+            scrollY,
+            scrollRangeX,
+            scrollRangeY,
+            maxOverScrollX,
+            maxOverScrollY,
+            isTouchEvent
+        )
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!pullRefreshEnabled) {
-            if (isPullActive || isTrackingPull) {
+            if (isPullActive || isPointerDown) {
+                isPointerDown = false
+                canEnterPullThisGesture = false
                 resetPullState(notifyCancel = true)
             }
             return super.onTouchEvent(event)
@@ -97,68 +168,78 @@ class OrbitPullRefreshWebView(context: Context) : WebView(context) {
             MotionEvent.ACTION_DOWN -> {
                 downRawX = event.rawX
                 downRawY = event.rawY
-                isTrackingPull = (scrollY == 0 && !canScrollVertically(-1))
+                lastMoveRawX = event.rawX
+                lastMoveRawY = event.rawY
+                isPointerDown = true
+                canEnterPullThisGesture = (scrollY == 0 && !canScrollVertically(-1))
                 isPullActive = false
+                sentCancelToSuper = false
+                overscrollAccumPx = 0f
                 currentFraction = 0f
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
-                if (isPullActive || isTrackingPull) {
+                canEnterPullThisGesture = false
+                if (isPullActive) {
                     resetPullState(notifyCancel = true)
                 }
             }
 
             MotionEvent.ACTION_MOVE -> {
                 if (event.pointerCount > 1) {
-                    if (isPullActive || isTrackingPull) {
+                    canEnterPullThisGesture = false
+                    if (isPullActive) {
                         resetPullState(notifyCancel = true)
                     }
                     return super.onTouchEvent(event)
                 }
 
-                if (isTrackingPull) {
-                    val totalDx = event.rawX - downRawX
-                    val totalDy = event.rawY - downRawY
+                lastMoveRawX = event.rawX
+                lastMoveRawY = event.rawY
 
-                    if (!isPullActive) {
-                        if (scrollY > 0 || canScrollVertically(-1) ||
-                            totalDy < -touchSlop ||
-                            (abs(totalDx) > touchSlop && abs(totalDx) > abs(totalDy))
-                        ) {
-                            isTrackingPull = false
-                        } else if (totalDy > touchSlop && abs(totalDy) > abs(totalDx) * 1.25f) {
-                            isPullActive = true
-                            val cancelEvent = MotionEvent.obtain(event).apply {
-                                action = MotionEvent.ACTION_CANCEL
-                            }
-                            super.onTouchEvent(cancelEvent)
-                            cancelEvent.recycle()
-
-                            currentFraction = OrbitPullRefreshMath.computeDampedFraction(
-                                pullDeltaPx = totalDy - touchSlop,
-                                triggerThresholdPx = triggerThresholdPx
-                            )
-                            pullRefreshCallbacks?.onPullProgress(currentFraction)
-                            return true
-                        }
-                    } else {
-                        val pullPx = (totalDy - touchSlop).coerceAtLeast(0f)
-                        currentFraction = OrbitPullRefreshMath.computeDampedFraction(
-                            pullDeltaPx = pullPx,
-                            triggerThresholdPx = triggerThresholdPx
-                        )
-                        pullRefreshCallbacks?.onPullProgress(currentFraction)
-                        return true
+                if (isPullActive) {
+                    if (!sentCancelToSuper) {
+                        sendCancelToSuper(event)
                     }
+                    val pullPx = event.rawY - pullOriginRawY
+                    if (pullPx <= 0f) {
+                        resetPullState(notifyCancel = true)
+                        canEnterPullThisGesture = false
+                        return super.onTouchEvent(event)
+                    }
+                    currentFraction = OrbitPullRefreshMath.computeDampedFraction(
+                        pullDeltaPx = pullPx,
+                        triggerThresholdPx = triggerThresholdPx
+                    )
+                    pullRefreshCallbacks?.onPullProgress(currentFraction)
+                    return true
                 }
+
+                val totalDx = event.rawX - downRawX
+                val totalDy = event.rawY - downRawY
+                if (totalDy < -touchSlop ||
+                    (abs(totalDx) > touchSlop && abs(totalDx) > abs(totalDy)) ||
+                    (canEnterPullThisGesture && totalDy > maxGestureLeadBeforeOverscrollPx)
+                ) {
+                    canEnterPullThisGesture = false
+                }
+
+                val handled = super.onTouchEvent(event)
+                if (isPullActive && !sentCancelToSuper) {
+                    sendCancelToSuper(event)
+                }
+                return handled
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                isPointerDown = false
+                canEnterPullThisGesture = false
                 if (isPullActive) {
                     val shouldTrigger = event.actionMasked == MotionEvent.ACTION_UP &&
                         OrbitPullRefreshMath.shouldTriggerRefresh(currentFraction)
                     isPullActive = false
-                    isTrackingPull = false
+                    sentCancelToSuper = false
+                    overscrollAccumPx = 0f
                     currentFraction = 0f
                     if (shouldTrigger) {
                         pullRefreshCallbacks?.onPullTriggered()
@@ -167,17 +248,30 @@ class OrbitPullRefreshWebView(context: Context) : WebView(context) {
                     }
                     return true
                 }
-                isTrackingPull = false
+                overscrollAccumPx = 0f
+                if (event.actionMasked == MotionEvent.ACTION_UP) {
+                    onVisualContentInvalidated?.invoke()
+                }
             }
         }
 
         return super.onTouchEvent(event)
     }
 
+    private fun sendCancelToSuper(source: MotionEvent) {
+        sentCancelToSuper = true
+        val cancelEvent = MotionEvent.obtain(source).apply {
+            action = MotionEvent.ACTION_CANCEL
+        }
+        super.onTouchEvent(cancelEvent)
+        cancelEvent.recycle()
+    }
+
     private fun resetPullState(notifyCancel: Boolean) {
         val wasActive = isPullActive || currentFraction > 0f
-        isTrackingPull = false
         isPullActive = false
+        sentCancelToSuper = false
+        overscrollAccumPx = 0f
         currentFraction = 0f
         if (notifyCancel && wasActive) {
             pullRefreshCallbacks?.onPullCancelled()

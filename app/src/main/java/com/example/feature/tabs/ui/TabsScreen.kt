@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -26,13 +24,7 @@ import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.ViewAgenda
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,9 +37,13 @@ import com.example.core.datastore.StartBackgroundMode
 import com.example.core.datastore.TabViewMode
 import com.example.core.ui.components.OrbitActionPill
 import com.example.core.ui.components.OrbitEmptyState
+import com.example.core.ui.components.OrbitExtendedFloatingActionButton
+import com.example.core.ui.components.OrbitFloatingActionButton
+import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitSectionHeader
 import com.example.core.ui.components.OrbitSegmentPill
 import com.example.core.ui.components.OrbitTopBar
+import com.example.core.ui.components.rememberOrbitSurfacePalette
 import com.example.core.ui.theme.OrbitIncognitoPurple
 import com.example.core.ui.theme.OrbitSpacing
 import com.example.feature.browser.model.BrowserTabModel
@@ -83,6 +79,8 @@ fun TabsScreen(
         "${tabs.size} open"
     }
 
+    val palette = rememberOrbitSurfacePalette()
+
     Scaffold(
         topBar = {
             OrbitTopBar(
@@ -90,21 +88,13 @@ fun TabsScreen(
                 subtitle = subtitleText,
                 onBackClick = onBack,
                 actions = {
-                    TextButton(
+                    OrbitGhostButton(
+                        text = stringResource(R.string.tabs_close_all),
+                        icon = Icons.Rounded.DeleteSweep,
+                        isDestructive = true,
                         onClick = onCloseAll,
                         modifier = Modifier.testTag("tabs_close_all_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DeleteSweep,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.tabs_close_all),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
+                    )
                 }
             )
         },
@@ -113,21 +103,18 @@ fun TabsScreen(
                 horizontalArrangement = Arrangement.spacedBy(OrbitSpacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FloatingActionButton(
+                OrbitFloatingActionButton(
                     onClick = { onNewTab(true) },
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    icon = Icons.Rounded.Security,
+                    contentDescription = stringResource(R.string.tabs_new_incognito),
+                    containerColor = palette.panel,
+                    contentColor = OrbitIncognitoPurple,
                     modifier = Modifier.testTag("new_incognito_tab_fab")
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Security,
-                        contentDescription = stringResource(R.string.tabs_new_incognito),
-                        tint = OrbitIncognitoPurple
-                    )
-                }
-                ExtendedFloatingActionButton(
+                )
+                OrbitExtendedFloatingActionButton(
+                    text = stringResource(R.string.tabs_new),
+                    icon = Icons.Rounded.Add,
                     onClick = { onNewTab(false) },
-                    icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.tabs_new)) },
                     modifier = Modifier.testTag("new_tab_fab")
                 )
             }

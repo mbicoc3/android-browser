@@ -12,6 +12,7 @@ import com.example.core.database.dao.DownloadDao
 import com.example.core.database.dao.FilterListDao
 import com.example.core.database.dao.FilterRuleDao
 import com.example.core.database.dao.HistoryDao
+import com.example.core.database.dao.ImageCollectionDao
 import com.example.core.database.dao.OfflinePageDao
 import com.example.core.database.dao.PasswordVaultDao
 import com.example.core.database.dao.SandboxDao
@@ -27,6 +28,7 @@ import com.example.core.database.entity.DownloadEntity
 import com.example.core.database.entity.FilterListEntity
 import com.example.core.database.entity.FilterRuleEntity
 import com.example.core.database.entity.HistoryEntity
+import com.example.core.database.entity.ImageCollectionEntity
 import com.example.core.database.entity.OfflinePageEntity
 import com.example.core.database.entity.PasswordHistoryEntity
 import com.example.core.database.entity.SandboxEntity
@@ -52,9 +54,10 @@ import com.example.core.database.entity.VaultNoteEntity
         CredentialFolderEntity::class,
         PasswordHistoryEntity::class,
         BackupMetadataEntity::class,
-        SandboxEntity::class
+        SandboxEntity::class,
+        ImageCollectionEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class OrbitDatabase : RoomDatabase() {
@@ -70,6 +73,7 @@ abstract class OrbitDatabase : RoomDatabase() {
     abstract fun offlinePageDao(): OfflinePageDao
     abstract fun passwordVaultDao(): PasswordVaultDao
     abstract fun sandboxDao(): SandboxDao
+    abstract fun imageCollectionDao(): ImageCollectionDao
 
     companion object {
         @Volatile
@@ -292,6 +296,26 @@ abstract class OrbitDatabase : RoomDatabase() {
             }
         }
 
+        internal val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `image_collections` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `imageUrl` TEXT NOT NULL,
+                        `sourcePageUrl` TEXT NOT NULL DEFAULT '',
+                        `collectionName` TEXT NOT NULL DEFAULT 'General',
+                        `createdAt` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_image_collections_imageUrl` ON `image_collections` (`imageUrl`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_image_collections_collectionName` ON `image_collections` (`collectionName`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_image_collections_createdAt` ON `image_collections` (`createdAt`)")
+            }
+        }
+
         fun getInstance(context: Context): OrbitDatabase {
             return instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
@@ -306,7 +330,8 @@ abstract class OrbitDatabase : RoomDatabase() {
                         MIGRATION_5_6,
                         MIGRATION_6_7,
                         MIGRATION_7_8,
-                        MIGRATION_8_9
+                        MIGRATION_8_9,
+                        MIGRATION_9_10
                     )
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()

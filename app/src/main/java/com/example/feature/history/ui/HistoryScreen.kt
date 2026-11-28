@@ -20,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +38,7 @@ import com.example.core.database.entity.HistoryEntity
 import com.example.core.ui.components.OrbitConfirmDialog
 import com.example.core.ui.components.OrbitEmptyState
 import com.example.core.ui.components.OrbitFilterField
+import com.example.core.ui.components.OrbitGhostButton
 import com.example.core.ui.components.OrbitSectionHeader
 import com.example.core.ui.components.OrbitSurfaceCard
 import com.example.core.ui.components.OrbitTopBar
@@ -62,14 +62,13 @@ fun HistoryScreen(
                 onBackClick = onBack,
                 actions = {
                     if (state.totalCount > 0) {
-                        TextButton(
+                        OrbitGhostButton(
+                            text = stringResource(R.string.history_clear_all),
+                            icon = Icons.Rounded.DeleteSweep,
+                            isDestructive = true,
                             onClick = { showClearConfirm = true },
                             modifier = Modifier.testTag("history_clear_all_button")
-                        ) {
-                            Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(stringResource(R.string.history_clear_all))
-                        }
+                        )
                     }
                 }
             )

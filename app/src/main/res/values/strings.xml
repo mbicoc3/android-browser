@@ -223,4 +223,28 @@
     <string name="sandboxes_empty_subtitle">Create isolated sessions per site.</string>
     <string name="more_menu_sandbox">Open in Sandbox</string>
     <string name="more_menu_sandbox_active">Sandbox: %1$s</string>
+
+    <!-- Image Collections -->
+    <string name="collections_title">Collections</string>
+    <string name="collections_subtitle_count">%1$d collected</string>
+    <string name="collections_search">Filter collected images</string>
+    <string name="collections_add">Collect Image URL</string>
+    <string name="collections_add_subtitle">Save only the URL &amp; view temporary thumbnails</string>
+    <string name="collections_empty_title">No collected images yet</string>
+    <string name="collections_empty_subtitle">Long-press any image on the web or tap Collect on an image URL to save links here without filling storage.</string>
+    <string name="collections_clear_all">Clear All</string>
+    <string name="collections_clear_all_title">Clear Image Collections?</string>
+    <string name="collections_clear_all_message">This removes all saved image URLs from Collections. No webpage bookmarks are affected.</string>
+    <string name="collections_field_image_url">Image URL</string>
+    <string name="collections_field_title">Title (optional)</string>
+    <string name="collections_field_folder">Collection</string>
+    <string name="collections_preview_unavailable">No preview</string>
+    <string name="collections_action_open_image">Open URL</string>
+    <string name="collections_action_source_page">Source Page</string>
+    <string name="collections_collect_image">Collect Image</string>
+    <string name="collections_collect_action">Collect</string>
+    <string name="collections_download_started">Download queued</string>
+    <string name="ctx_collect_image">Save to Collection</string>
+    <string name="ctx_collect_image_subtitle">Collect image URL with thumbnail preview</string>
+    <string name="msg_collected_image">Saved to Image Collections</string>
 </resources>

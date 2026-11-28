@@ -1,8 +1,6 @@
 package com.example.feature.browser.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,44 +8,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.BuildConfig
 import com.example.R
 import com.example.core.registry.BrowserFeatureModule
 import com.example.core.registry.BrowserToolRegistry
 import com.example.core.ui.components.OrbitActionPill
+import com.example.core.ui.components.OrbitCompactSwitchTile
 import com.example.core.ui.components.OrbitModalBottomSheet
 import com.example.core.ui.components.OrbitSheetBentoTile
 import com.example.core.ui.components.OrbitSheetHairlineDivider
@@ -55,7 +43,6 @@ import com.example.core.ui.components.OrbitSheetHeader
 import com.example.core.ui.components.OrbitSheetPagerTabs
 import com.example.core.ui.components.OrbitSheetPanel
 import com.example.core.ui.components.OrbitSheetStatusPill
-import com.example.core.ui.components.rememberOrbitSheetPalette
 import com.example.core.ui.theme.OrbitEmerald
 import kotlinx.coroutines.launch
 
@@ -73,7 +60,21 @@ fun ToolsMenuSheet(
     onModuleClick: (BrowserFeatureModule) -> Unit
 ) {
     val modules = remember { BrowserToolRegistry.getQuickSheetTools() }
-    val toolPages = remember(modules) { modules.chunked(8) }
+    val toolPages = remember(modules) {
+        if (modules.size <= 8) {
+            listOf(modules)
+        } else if (modules.size <= 20) {
+            listOf(modules.take(8), modules.drop(8))
+        } else {
+            listOf(modules.take(8)) + modules.drop(8).chunked(12)
+        }
+    }
+    val maxToolRows = remember(toolPages) {
+        (toolPages.maxOfOrNull { (it.size + 3) / 4 } ?: 2).coerceAtLeast(2)
+    }
+    val pagerHeight = remember(maxToolRows) {
+        (maxToolRows * 62 + (maxToolRows - 1) * 8 + 4).dp.coerceAtLeast(136.dp)
+    }
     val pageTitles = remember(toolPages.size) {
         toolPages.indices.map { idx ->
             when (idx) {
@@ -92,8 +93,9 @@ fun ToolsMenuSheet(
     ) {
         OrbitSheetHeader(
             title = "Orbit",
+            subtitle = "v${BuildConfig.VERSION_NAME}",
             icon = Icons.Rounded.Tune,
-            iconTint = if (blockTrackers) OrbitEmerald else MaterialTheme.colorScheme.primary,
+            iconTint = if (blockTrackers) OrbitEmerald else MaterialTheme.colorScheme.onSurface,
             trailing = {
                 if (isPageActive && blockTrackers) {
                     OrbitSheetStatusPill(
@@ -119,7 +121,7 @@ fun ToolsMenuSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CompactShieldToggleCard(
+            OrbitCompactSwitchTile(
                 label = "Ad Block",
                 icon = Icons.Rounded.Shield,
                 checked = blockTrackers,
@@ -129,7 +131,7 @@ fun ToolsMenuSheet(
                 onCheckedChange = onToggleBlockTrackers,
                 modifier = Modifier.weight(1f)
             )
-            CompactShieldToggleCard(
+            OrbitCompactSwitchTile(
                 label = "Cosmetic",
                 icon = Icons.Rounded.AutoFixHigh,
                 checked = cosmeticFilteringEnabled,
@@ -155,7 +157,7 @@ fun ToolsMenuSheet(
             beyondViewportPageCount = (pageTitles.size - 1).coerceAtLeast(1),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(126.dp)
+                .height(pagerHeight)
                 .testTag("tools_sheet_pager")
         ) { pageIndex ->
             if (pageIndex < toolPages.size) {
@@ -175,88 +177,6 @@ fun ToolsMenuSheet(
 }
 
 @Composable
-private fun CompactShieldToggleCard(
-    label: String,
-    icon: ImageVector,
-    checked: Boolean,
-    enabled: Boolean,
-    activeTint: Color,
-    testTag: String,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val palette = rememberOrbitSheetPalette()
-    val tint = when {
-        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        checked -> activeTint
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-        OrbitSheetPanel(
-            modifier = modifier,
-            selected = checked && enabled,
-            onClick = if (enabled) {
-                { onCheckedChange(!checked) }
-            } else null
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(7.dp))
-                            .background(tint.copy(alpha = if (palette.isDark) 0.16f else 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = tint,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                        color = if (enabled) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Switch(
-                    checked = checked,
-                    enabled = enabled,
-                    onCheckedChange = onCheckedChange,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                        checkedTrackColor = activeTint
-                    ),
-                    modifier = Modifier
-                        .scale(0.74f)
-                        .testTag(testTag)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun ToolGridSlide(
     modules: List<BrowserFeatureModule>,
     isDesktopMode: Boolean,
@@ -267,7 +187,7 @@ private fun ToolGridSlide(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         modules.chunked(4).forEach { rowModules ->
             Row(

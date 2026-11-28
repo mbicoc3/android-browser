@@ -2,6 +2,7 @@ package com.example.core.registry
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.DesktopWindows
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.EnhancedEncryption
@@ -38,6 +39,14 @@ object BrowserToolRegistry {
             subtitle = "Saved sites & folders",
             route = BrowserRoutes.BOOKMARKS,
             icon = Icons.Rounded.Bookmarks,
+            category = ToolCategory.NAVIGATION
+        ),
+        BrowserFeatureModule(
+            id = "image_collections",
+            title = "Collections",
+            subtitle = "Collected image URLs & previews",
+            route = BrowserRoutes.IMAGE_COLLECTIONS,
+            icon = Icons.Rounded.CollectionsBookmark,
             category = ToolCategory.NAVIGATION
         ),
         BrowserFeatureModule(

@@ -229,6 +229,14 @@ class BottomSheetAndTabSwipeTest {
             }
         }
 
+        assertEquals(
+            0,
+            composeRule.onAllNodes(androidx.compose.ui.test.hasText("Store link in Orbit Bookmarks")).fetchSemanticsNodes().size
+        )
+        assertEquals(
+            0,
+            composeRule.onAllNodes(androidx.compose.ui.test.hasText("Highlight element text to adjust & copy")).fetchSemanticsNodes().size
+        )
         composeRule.onNodeWithTag("ctx_open_new_tab").performClick()
         assertTrue(openedNewTab)
 

@@ -60,6 +60,8 @@ internal fun BrowserOverlaysHost(
     onToggleBlockTrackers: (Boolean) -> Unit,
     onToggleCosmeticFiltering: (Boolean) -> Unit,
     onSaveBookmark: (title: String, url: String) -> Unit,
+    onCollectImage: (title: String, imageUrl: String, sourcePageUrl: String) -> Unit = { _, _, _ -> },
+    onBeforeTabLeave: () -> Unit = {},
     onDownloadFolderPicked: (Uri) -> Unit,
     onConfirmBeforeDownloadChanged: (Boolean) -> Unit,
     onRequestDownload: (url: String, contentDisposition: String?, mimeType: String?) -> Unit,
@@ -119,6 +121,9 @@ internal fun BrowserOverlaysHost(
                 pendingWallpaperAdjust = WallpaperAdjustInput.WebUrl(imageUrl)
             },
             onSaveBookmark = onSaveBookmark,
+            onCollectImage = { title, imageUrl ->
+                onCollectImage(title, imageUrl, activeTab?.url.orEmpty())
+            },
             onPinToHome = { title, url ->
                 viewModel.addSpeedDialShortcut(title, url)
             },
@@ -183,10 +188,12 @@ internal fun BrowserOverlaysHost(
             sandboxes = sandboxes,
             isMultiProfileSupported = remember { SandboxProfileEngine.isMultiProfileSupported() },
             onSelectSandbox = { sandbox ->
+                onBeforeTabLeave()
                 val targetUrl = if (UrlUtils.isStartPage(currentUrl)) sandbox.startUrl else currentUrl
                 viewModel.openUrlInSandbox(targetUrl, sandbox)
             },
             onOpenInDefaultProfile = {
+                onBeforeTabLeave()
                 val targetUrl = if (UrlUtils.isStartPage(currentUrl)) UrlUtils.START_PAGE_URL else currentUrl
                 viewModel.openUrlInNewTab(targetUrl, isIncognito = false)
             },

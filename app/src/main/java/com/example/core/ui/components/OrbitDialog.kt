@@ -2,8 +2,6 @@ package com.example.core.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,12 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,9 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -62,8 +57,6 @@ fun OrbitDialog(
     content: @Composable ColumnScope.(OrbitSurfacePalette) -> Unit
 ) {
     val palette = rememberOrbitSurfacePalette()
-    val primary = MaterialTheme.colorScheme.primary
-    val secondary = MaterialTheme.colorScheme.secondary
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -84,52 +77,27 @@ fun OrbitDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .drawBehind {
-                        drawLine(
-                            color = palette.topHighlight,
-                            start = Offset(size.width * 0.14f, 1f),
-                            end = Offset(size.width * 0.86f, 1f),
-                            strokeWidth = 1.1.dp.toPx()
-                        )
-                        drawRect(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    (if (isDestructive) iconTint else primary)
-                                        .copy(alpha = if (palette.isDark) 0.09f else 0.055f),
-                                    secondary.copy(alpha = if (palette.isDark) 0.03f else 0.015f),
-                                    Color.Transparent
-                                ),
-                                center = Offset(size.width * 0.5f, 0f),
-                                radius = size.width * 0.9f
-                            )
-                        )
-                    }
-                    .padding(horizontal = 14.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (icon != null) {
                         Box(
                             modifier = Modifier
-                                .size(30.dp)
-                                .clip(RoundedCornerShape(9.dp))
-                                .background(iconTint.copy(alpha = if (palette.isDark) 0.16f else 0.11f))
-                                .border(
-                                    width = 0.8.dp,
-                                    color = iconTint.copy(alpha = 0.32f),
-                                    shape = RoundedCornerShape(9.dp)
-                                ),
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(palette.tile),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
                                 tint = iconTint,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(17.dp)
                             )
                         }
                     }
@@ -237,38 +205,20 @@ fun OrbitConfirmDialog(
                     .then(if (confirmTestTag != null) Modifier.testTag(confirmTestTag) else Modifier)
             )
         }
-    ) { palette ->
+    ) { _ ->
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (!acknowledgeText.isNullOrBlank() && onAcknowledgedChange != null) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .clickable { onAcknowledgedChange(!acknowledged) },
-                shape = RoundedCornerShape(14.dp),
-                color = palette.panel,
-                border = BorderStroke(OrbitControlTokens.HairlineWidth, palette.hairline)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = acknowledged,
-                        onCheckedChange = onAcknowledgedChange
-                    )
-                    Text(
-                        text = acknowledgeText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            OrbitSheetPanel {
+                OrbitCheckboxRow(
+                    title = acknowledgeText,
+                    checked = acknowledged,
+                    onCheckedChange = onAcknowledgedChange,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
             }
         }
     }

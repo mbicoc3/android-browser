@@ -30,24 +30,41 @@ class TabPreviewStore {
     }
 
     private val lastCapturedMs = ConcurrentHashMap<String, Long>()
+    private val lastCapturedUrl = ConcurrentHashMap<String, String>()
 
     private val _revision = MutableStateFlow(0L)
     val revision: StateFlow<Long> = _revision.asStateFlow()
 
     fun getPreview(tabId: String): Bitmap? = cache.get(tabId)
 
+    fun invalidateIfUrlChanged(tabId: String, newUrl: String) {
+        val prevUrl = lastCapturedUrl[tabId] ?: return
+        if (prevUrl != newUrl) {
+            cache.remove(tabId)
+            lastCapturedMs.remove(tabId)
+            lastCapturedUrl.remove(tabId)
+            _revision.value = _revision.value + 1L
+        }
+    }
+
     fun captureFromWebView(
         tabId: String,
         webView: WebView,
         force: Boolean = false,
-        minIntervalMs: Long = 2_000L
+        minIntervalMs: Long = 500L
     ) {
-        if (webView.visibility != View.VISIBLE || webView.width <= 0 || webView.height <= 0) return
-        if (UrlUtils.isStartPage(webView.url)) return
+        if (!webView.isAttachedToWindow ||
+            webView.visibility != View.VISIBLE ||
+            webView.width <= 0 ||
+            webView.height <= 0
+        ) return
+        val currentUrl = webView.url
+        if (currentUrl.isNullOrBlank() || UrlUtils.isStartPage(currentUrl)) return
 
         val now = System.currentTimeMillis()
         val prev = lastCapturedMs[tabId] ?: 0L
-        if (!force && (now - prev) < minIntervalMs) return
+        val urlChanged = lastCapturedUrl[tabId] != currentUrl
+        if (!force && !urlChanged && (now - prev) < minIntervalMs) return
 
         val targetWidth = minOf(MAX_PREVIEW_WIDTH_PX, webView.width)
         val scale = targetWidth.toFloat() / webView.width.toFloat()
@@ -68,18 +85,23 @@ class TabPreviewStore {
 
         cache.put(tabId, bitmap)
         lastCapturedMs[tabId] = now
+        lastCapturedUrl[tabId] = currentUrl
         _revision.value = _revision.value + 1L
     }
 
     fun remove(tabId: String) {
-        cache.remove(tabId)
-        lastCapturedMs.remove(tabId)
-        _revision.value = _revision.value + 1L
+        val hadEntry = cache.remove(tabId) != null ||
+            lastCapturedMs.remove(tabId) != null ||
+            lastCapturedUrl.remove(tabId) != null
+        if (hadEntry) {
+            _revision.value = _revision.value + 1L
+        }
     }
 
     fun clear() {
         cache.evictAll()
         lastCapturedMs.clear()
+        lastCapturedUrl.clear()
         _revision.value = _revision.value + 1L
     }
 

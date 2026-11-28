@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentPasteGo
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.MoreVert
@@ -53,7 +53,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -67,18 +66,19 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import com.example.R
 import com.example.core.common.SearchEngine
 import com.example.core.common.UrlUtils
+import com.example.core.ui.components.OrbitBadgeChip
+import com.example.core.ui.components.OrbitControlTokens
+import com.example.core.ui.components.OrbitSearchPillSurface
 import com.example.core.ui.theme.OrbitEmerald
 import com.example.core.ui.theme.OrbitIncognitoPurple
 import com.example.core.ui.theme.OrbitMonoStyle
@@ -107,6 +107,7 @@ fun BrowserOmniboxBar(
     onOpenTabs: () -> Unit = {},
     onSwitchTab: (Int) -> Unit = {},
     onInspectSiteData: (() -> Unit)? = null,
+    onDirectImageDownload: () -> Unit = {},
     multiPurposeCallbacks: OmniboxMultiPurposeCallbacks,
     pageMenuCallbacks: BrowserPageMenuCallbacks,
     modifier: Modifier = Modifier
@@ -142,10 +143,12 @@ fun BrowserOmniboxBar(
                     .padding(horizontal = OrbitSpacing.sm, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
+                OrbitSearchPillSurface(
+                    focused = isOmniboxFocused || isQuickPanelOpen,
+                    height = OrbitControlTokens.OmniboxHeight,
+                    shape = CircleShape,
                     modifier = Modifier
                         .weight(1f)
-                        .height(38.dp)
                         .graphicsLayer { translationX = pillOffsetX.value }
                         .pointerInput(Unit) {
                             val touchSlop = viewConfiguration.touchSlop
@@ -206,17 +209,7 @@ fun BrowserOmniboxBar(
                                     }
                                 }
                             }
-                        },
-                    shape = RoundedCornerShape(19.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    border = BorderStroke(
-                        width = 0.8.dp,
-                        color = if (isOmniboxFocused || isQuickPanelOpen) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                         }
-                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -299,65 +292,36 @@ fun BrowserOmniboxBar(
 
                         if (!isOmniboxFocused && !isStartPage && !activeTab?.sandboxName.isNullOrBlank()) {
                             val sbColor = Color(activeTab?.sandboxColorHex ?: 0xFF38BDF8)
-                            Surface(
+                            OrbitBadgeChip(
+                                text = activeTab?.sandboxName.orEmpty(),
+                                accentColor = sbColor,
+                                leadingDot = true,
                                 onClick = pageMenuCallbacks.onOpenSandboxPicker,
-                                shape = RoundedCornerShape(8.dp),
-                                color = sbColor.copy(alpha = 0.16f),
-                                border = BorderStroke(0.8.dp, sbColor.copy(alpha = 0.45f)),
                                 modifier = Modifier
                                     .padding(horizontal = 3.dp)
                                     .testTag("omnibox_sandbox_badge")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(5.dp)
-                                            .clip(CircleShape)
-                                            .background(sbColor)
-                                    )
-                                    Text(
-                                        text = activeTab?.sandboxName.orEmpty(),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
+                            )
                         } else if (!isOmniboxFocused && !isStartPage && directImage != null) {
-                            Surface(
-                                onClick = onToggleQuickPanel,
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                            OrbitBadgeChip(
+                                text = directImage.dimensionLabel,
+                                accentColor = MaterialTheme.colorScheme.primary,
+                                leadingIcon = Icons.Rounded.Image,
                                 modifier = Modifier
                                     .padding(horizontal = 3.dp)
                                     .testTag("omnibox_image_dimension_badge")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            )
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                                IconButton(
+                                    onClick = onDirectImageDownload,
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .testTag("omnibox_direct_image_download_button")
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Image,
-                                        contentDescription = stringResource(R.string.omnibox_image_badge_desc),
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(13.dp)
-                                    )
-                                    Text(
-                                        text = directImage.dimensionLabel,
-                                        style = OrbitMonoStyle.copy(
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        maxLines = 1,
-                                        softWrap = false
+                                        imageVector = Icons.Rounded.Download,
+                                        contentDescription = stringResource(R.string.omnibox_action_download),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
@@ -452,6 +416,7 @@ fun BrowserOmniboxBar(
                             currentUrl = currentUrl,
                             isBookmarked = isBookmarked,
                             isDesktopMode = activeTab?.isDesktopMode == true,
+                            isDirectImage = directImage != null,
                             activeSandboxName = activeTab?.sandboxName,
                             lastShareComponent = lastShareComponent,
                             lastShareAppLabel = lastShareAppLabel,

@@ -1,7 +1,6 @@
 package com.example.feature.tabs.ui
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +40,8 @@ import com.example.core.common.UrlUtils
 import com.example.core.datastore.AppThemeMode
 import com.example.core.datastore.StartBackgroundMode
 import com.example.core.ui.components.OrbitBadgeChip
+import com.example.core.ui.components.OrbitSurfaceCard
+import com.example.core.ui.components.rememberOrbitSurfacePalette
 import com.example.core.ui.theme.OrbitIncognitoPurple
 import com.example.core.ui.theme.OrbitSpacing
 import com.example.feature.browser.model.BrowserTabModel
@@ -62,30 +61,20 @@ fun TabGridCard(
 ) {
     val isStartPage = UrlUtils.isStartPage(tab.url)
     val cardHeight = if (previewEnabled) 176.dp else 112.dp
+    val hasSandbox = !tab.sandboxName.isNullOrBlank()
+    val cardAccent = when {
+        isActive && tab.isIncognito -> OrbitIncognitoPurple
+        hasSandbox -> Color(tab.sandboxColorHex ?: 0xFF38BDF8)
+        else -> MaterialTheme.colorScheme.primary
+    }
 
-    Card(
+    OrbitSurfaceCard(
+        selected = isActive || hasSandbox,
+        accentColor = cardAccent,
         onClick = onSelect,
         modifier = modifier
-            .fillMaxWidth()
             .height(cardHeight)
-            .testTag("tab_card_${tab.id}"),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isActive) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.42f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-            }
-        ),
-        border = BorderStroke(
-            width = if (isActive || !tab.sandboxName.isNullOrBlank()) 1.8.dp else 1.dp,
-            color = when {
-                isActive && tab.isIncognito -> OrbitIncognitoPurple
-                !tab.sandboxName.isNullOrBlank() -> Color(tab.sandboxColorHex ?: 0xFF38BDF8)
-                isActive -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
-            }
-        )
+            .testTag("tab_card_${tab.id}")
     ) {
         if (previewEnabled) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -253,28 +242,19 @@ fun TabListRow(
     modifier: Modifier = Modifier
 ) {
     val isStartPage = UrlUtils.isStartPage(tab.url)
-    Card(
+    val palette = rememberOrbitSurfacePalette()
+    val hasSandbox = !tab.sandboxName.isNullOrBlank()
+    val rowAccent = when {
+        isActive && tab.isIncognito -> OrbitIncognitoPurple
+        hasSandbox -> Color(tab.sandboxColorHex ?: 0xFF38BDF8)
+        else -> MaterialTheme.colorScheme.primary
+    }
+
+    OrbitSurfaceCard(
+        selected = isActive || hasSandbox,
+        accentColor = rowAccent,
         onClick = onSelect,
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("tab_list_row_${tab.id}"),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isActive) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.42f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-            }
-        ),
-        border = BorderStroke(
-            width = if (isActive || !tab.sandboxName.isNullOrBlank()) 1.8.dp else 1.dp,
-            color = when {
-                isActive && tab.isIncognito -> OrbitIncognitoPurple
-                !tab.sandboxName.isNullOrBlank() -> Color(tab.sandboxColorHex ?: 0xFF38BDF8)
-                isActive -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
-            }
-        )
+        modifier = modifier.testTag("tab_list_row_${tab.id}")
     ) {
         Row(
             modifier = Modifier
@@ -286,25 +266,10 @@ fun TabListRow(
                 modifier = Modifier
                     .size(46.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        if (tab.isIncognito) {
-                            OrbitIncognitoPurple.copy(alpha = 0.16f)
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                        }
-                    ),
+                    .background(palette.tile),
                 contentAlignment = Alignment.Center
             ) {
                 when {
-                    previewEnabled && previewBitmap != null -> {
-                        val imageBitmap = remember(previewBitmap) { previewBitmap.asImageBitmap() }
-                        Image(
-                            bitmap = imageBitmap,
-                            contentDescription = tab.title,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                     previewEnabled && isStartPage -> {
                         StartPageMiniPreview(
                             isIncognito = tab.isIncognito,
@@ -312,6 +277,15 @@ fun TabListRow(
                             backgroundMode = startBackgroundMode,
                             wallpaperUri = startWallpaperUri,
                             compact = true,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    previewEnabled && previewBitmap != null -> {
+                        val imageBitmap = remember(previewBitmap) { previewBitmap.asImageBitmap() }
+                        Image(
+                            bitmap = imageBitmap,
+                            contentDescription = tab.title,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                     }

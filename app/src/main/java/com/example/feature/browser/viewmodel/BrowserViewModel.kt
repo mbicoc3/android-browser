@@ -785,4 +785,11 @@ class BrowserViewModel(
 
     override fun onPageFaviconUrls(tabId: String, pageUrl: String, iconUrls: List<String>) =
         callbackHandler.onPageFaviconUrls(tabId, pageUrl, iconUrls)
+
+    override fun onUrlHistoryUpdated(
+        tabId: String,
+        url: String,
+        canGoBack: Boolean,
+        canGoForward: Boolean
+    ) = callbackHandler.onUrlHistoryUpdated(tabId, url, canGoBack, canGoForward)
 }

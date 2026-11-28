@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.EnhancedEncryption
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +39,7 @@ import com.example.core.common.FormatUtils
 import com.example.core.ui.components.OrbitBadgeChip
 import com.example.core.ui.components.OrbitDialog
 import com.example.core.ui.components.OrbitEmptyState
+import com.example.core.ui.components.OrbitFloatingActionButton
 import com.example.core.ui.components.OrbitPrimaryButton
 import com.example.core.ui.components.OrbitSecondaryButton
 import com.example.core.ui.components.OrbitSurfaceCard
@@ -69,12 +69,12 @@ fun PrivacyVaultScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            OrbitFloatingActionButton(
                 onClick = { showAddDialog = true },
+                icon = Icons.Rounded.Add,
+                contentDescription = stringResource(R.string.vault_add),
                 modifier = Modifier.testTag("add_vault_entry_fab")
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.vault_add))
-            }
+            )
         }
     ) { innerPadding ->
         if (entries.isEmpty()) {
@@ -192,7 +192,6 @@ private fun AddVaultEntryDialog(
     OrbitDialog(
         onDismissRequest = onDismiss,
         title = stringResource(R.string.vault_add),
-        subtitle = "Encrypted with Android Keystore before saving to Room",
         icon = Icons.Rounded.EnhancedEncryption,
         iconTint = OrbitEmerald,
         actions = {

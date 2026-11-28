@@ -5,10 +5,14 @@
 ---
 
 ## 1. Visual Direction
-Orbit follows a **Clean Neutral & Electric Cyan** aesthetic tailored for distraction-free mobile web browsing:
+Orbit follows a **Microsoft Edge Mobile-inspired Clean Neutral & Cobalt Blue** aesthetic tailored for distraction-free mobile web browsing:
 - **Default Theme:** **Light Theme is the default** (`AppThemeMode.LIGHT`), with full support for **Dark Theme** (`AppThemeMode.DARK`) and **System Default** (`AppThemeMode.SYSTEM`).
-- **Start Page Background Modes:** Supports **Solid Color** (white-grey `#F2F3F5` in Light theme, medium-dark neutral grey `#2B2B2E` in Dark theme—never bluish grey) and **Image Background** (customizable from `HomeCustomizeSheet` via Photo Picker or URL) with a **transparent bottom bar**.
-- **Mode Awareness:** Automatically adapts between **Light Theme**, **Dark Theme**, and **Incognito Stealth Theme** (`#A78BFA` primary accent).
+- **Surface Hierarchy (No Pastel Background Floods):**
+  - Sheets, menus, and dialogs sit on crisp white (`#FFFFFF`) in Light mode and neutral charcoal (`#1F2024`) in Dark mode.
+  - Grouped panels and bento tiles use subtle neutral containers (`#F4F5F7` / `#ECEEF2` Light, `#2A2B30` / `#32343A` Dark) with `0.8.dp` hairlines and **borderless `CircleShape` icon wells**.
+  - Cobalt Blue (`#0078D4` Light / `#3AA0F3` Dark) is reserved for interactive accents, focus rings, switches, and selection borders—not large pastel cyan background washes.
+- **Start Page Background Modes:** Supports **Solid Color** (`#F5F6F8` Light, `#1C1D20` Dark) and **Image Background** (customizable from `HomeCustomizeSheet` via Photo Picker or URL) with a **transparent bottom bar**.
+- **Mode Awareness:** Adapts seamlessly across **Light Theme**, **Dark Theme**, and **Incognito Stealth Theme** (`#A78BFA` primary accent).
 
 ---
 
@@ -17,37 +21,41 @@ Orbit follows a **Clean Neutral & Electric Cyan** aesthetic tailored for distrac
 ### Light Palette (Default)
 | Token | Hex | Usage |
 |---|---|---|
-| `OrbitLightBackground` | `#F3F4F5` | Screen scaffold background (white-grey) |
-| `OrbitLightSolidStartBg` | `#F2F3F5` | Start Page solid background (white-grey) |
+| `OrbitLightBackground` | `#F5F6F8` | Screen scaffold background |
+| `OrbitLightSolidStartBg` | `#F5F6F8` | Start Page solid background |
 | `OrbitLightSurface` | `#FFFFFF` | Bars, sheets, dialogs |
-| `OrbitLightSurfaceVariant` | `#E6E7EA` | Cards, omnibox pill |
-| `OrbitLightOnSurface` | `#18181B` | Primary text |
-| `OrbitLightOnSurfaceVariant` | `#52525B` | Secondary captions |
-| `OrbitLightPrimary` | `#0284C7` | Primary accent |
+| `OrbitLightSurfaceVariant` | `#ECEEF2` | Omnibox pill, circular icon wells |
+| `OrbitLightOnSurface` | `#1A1B1E` | Primary text |
+| `OrbitLightOnSurfaceVariant` | `#5C5F66` | Secondary captions |
+| `OrbitLightPrimary` | `#0078D4` | Cobalt Blue primary accent |
+| `OrbitLightPrimaryContainer` | `#E7F2FC` | Subtle tonal badge accent |
 | `OrbitLightSecondary` | `#4F46E5` | Secondary accent |
-| `OrbitLightEmerald` | `#059669` | HTTPS & security indicators |
-| `OrbitLightError` | `#E11D48` | Error states |
+| `OrbitLightEmerald` | `#107C41` | HTTPS & security indicators |
+| `OrbitLightError` | `#D13438` | Error & destructive actions |
 
-### Neutral Dark Palette (Medium-Dark Neutral Grey — Non-Bluish)
+### Neutral Dark Palette (Charcoal — Zero Muddy Blue Wash)
 | Token | Hex | Usage |
 |---|---|---|
-| `OrbitDarkBackground` | `#242426` | Screen scaffold background |
-| `OrbitDarkSolidStartBg` | `#2B2B2E` | Start Page solid background (neutral dark grey) |
-| `OrbitDarkSurface` | `#2C2C2F` | Top/bottom bars, sheets, dialogs |
-| `OrbitDarkSurfaceVariant` | `#36363A` | Cards, omnibox pill, filter fields |
-| `OrbitDarkSurfaceElevated` | `#404044` | High-emphasis containers |
-| `OrbitDarkOnSurface` | `#F4F4F5` | Primary headings & body text |
-| `OrbitDarkOnSurfaceVariant` | `#B4B4BC` | URLs, timestamps, secondary captions |
-| `OrbitDarkOutline` | `#525258` | Hairline card & pill borders |
-| `OrbitCyan` | `#38BDF8` | Primary brand accent & active actions |
-| `OrbitCyanContainer` | `#0C4A6E` | Active pills, chips, desktop toggle highlight |
-| `OrbitIndigo` | `#818CF8` | Secondary accent (history, tools) |
+| `OrbitDarkBackground` | `#141517` | Screen scaffold background |
+| `OrbitDarkSolidStartBg` | `#1C1D20` | Start Page solid background |
+| `OrbitDarkSurface` | `#1E1F23` | Top/bottom bars, dialogs |
+| `OrbitDarkSurfaceVariant` | `#2A2B30` | Cards, panels, filter fields |
+| `OrbitDarkSurfaceElevated` | `#34363C` | Elevated containers |
+| `OrbitDarkOnSurface` | `#F4F5F7` | Primary headings & body text |
+| `OrbitDarkOnSurfaceVariant` | `#B2B5BD` | URLs, timestamps, secondary captions |
+| `OrbitDarkOutline` | `#3D4047` | Hairline card & pill borders |
+| `OrbitCyan` | `#3AA0F3` | Dark Cobalt Blue primary accent |
 | `OrbitEmerald` | `#34D399` | HTTPS lock badge, Tracker Shield, AES-GCM vault |
 | `OrbitIncognitoPurple` | `#A78BFA` | Incognito mode accent & tab border |
-| `OrbitIncognitoSurface` | `#1D1829` | Incognito toolbar & shell surface |
-| `OrbitRoseError` | `#FB7185` | Failed downloads & destructive alerts |
+| `OrbitIncognitoSurface` | `#1C1A26` | Incognito toolbar & shell surface |
+| `OrbitRoseError` | `#F87171` | Failed downloads & destructive alerts |
 
-> **Rule:** Never hardcode raw `Color(0xFF...)` values inside feature screens. Always read from `MaterialTheme.colorScheme` or semantic tokens in `Color.kt`.
+### Centralized Surface Palette (`OrbitSurfacePalette` / `rememberOrbitSurfacePalette()`)
+- **Light Sheet/Panel/Tile:** `canvas = #FFFFFF`, `panel = #F4F5F7`, `tile = #ECEEF2`, `activeFill = #FFFFFF`, `hairline = #14000000`
+- **Dark Sheet/Panel/Tile:** `canvas = #1F2024`, `panel = #2A2B30`, `tile = #32343A`, `activeFill = #363840`, `hairline = #18FFFFFF`
+- **Semantic Tokens:** `OrbitGradientIndigo`, `OrbitSpeedDialFallbackBg`, `OrbitSpeedDialDarkInk`, `OrbitLightDotInactive`, `OrbitWallpaperScrimTop/Mid/Low/Bottom`
+
+> **Rule:** Never hardcode raw `Color(0x...)` values inside feature screens. Always read from `MaterialTheme.colorScheme`, `rememberOrbitSurfacePalette()`, or semantic tokens in `Color.kt`.
 
 ---
 
@@ -71,39 +79,32 @@ Fonts are bundled locally in `app/src/main/res/font/`:
 
 ---
 
-## 4. Spacing, Shapes & Accessibility (`core/ui/theme/Spacing.kt`)
-- **Spacing Scale (`OrbitSpacing`):** `xs = 4.dp`, `sm = 8.dp`, `md = 16.dp`, `lg = 24.dp`, `xl = 32.dp`.
-- **Minimum Touch Target:** `48.dp` (`OrbitSpacing.touchTargetMin`).
-- **Shape Tokens (`OrbitShapes`):**
-  - `extraSmall`: `8.dp` (badge chips)
-  - `small`: `12.dp` (compact tiles)
-  - `medium`: `16.dp` (standard cards & tool tiles)
-  - `large`: `22.dp` (hero banners, filter fields)
-  - `extraLarge`: `28.dp` (omnibox & floating search pills)
+## 4. Spacing, Shapes & Window Insets (`core/ui/theme/Spacing.kt` & `OrbitControlTokens`)
+- **Spacing Scale (`OrbitSpacing`):** `xs = 4.dp`, `sm = 8.dp`, `md = 16.dp`, `lg = 24.dp`, `xl = 32.dp`, `touchTargetMin = 48.dp`.
+- **Control Metrics (`OrbitControlTokens`):**
+  - `ControlHeight = 40.dp`, `InputMinHeight = 42.dp`, `CapsuleHeight = 32.dp`, `OmniboxHeight = 40.dp`, `StartSearchHeight = 52.dp`
+  - `ControlCornerRadius = 12.dp`, `SegmentCornerRadius = 16.dp`, `CardCornerRadius = 16.dp`, `PanelCornerRadius = 16.dp`, `DialogCornerRadius = 22.dp`, `PopupCornerRadius = 16.dp`, `SheetCornerRadius = 24.dp`, `FabCornerRadius = 16.dp`, `HairlineWidth = 0.8.dp`
 - **Window Insets:**
   - `BrowserOmniboxBar` applies `WindowInsets.statusBars`.
-  - `BrowserBottomBar` and `ToolsMenuSheet` apply `.navigationBarsPadding()`.
+  - `BrowserBottomBar` and `OrbitModalBottomSheet` apply `.navigationBarsPadding()`.
   - Screens use `Scaffold` `innerPadding` for safe edge-to-edge rendering.
 
 ---
 
-## 5. Reusable UI Components (`core/ui/components/`)
-Always check and reuse these before building new UI primitives:
-- `OrbitControls` (`OrbitControlTokens`) — Uniform `48.dp` height, `16.dp` corner radius (`14.dp` for segment pills), `0.9.dp` hairline borders across `OrbitPrimaryButton`, `OrbitSecondaryButton`, `OrbitGhostButton`, `OrbitSegmentPill`, `OrbitActionPill`, and `54.dp` min-height `OrbitTextField` (`#2E2E2E` family dark surfaces / light-grey `#E9ECF2`–`#F5F6FA` surfaces).
-- `OrbitDialog` & `OrbitConfirmDialog` — Unified `28.dp` radius spatial modal container with `palette.canvas` fill, hairline border, top ambient highlight + radial glow, `40.dp` squircle icon header, bounded scrollable body, and equal-width `48.dp` footer buttons.
-- `OrbitPopupMenu` & `OrbitPopupMenuItem` — Unified `22.dp` radius popup menu with `48.dp` min-height rows and `32.dp` squircle icon badges.
-- `OrbitBottomSheet` & `OrbitBottomSheetItems` — Unified `32.dp` top-radius bottom sheet system (`OrbitModalBottomSheet`, `OrbitSheetHeader`, `OrbitSheetPanel`, `OrbitSheetBentoTile`, `OrbitSheetActionRow`, `OrbitSheetSwitchRow`, `OrbitSheetStatusPill`).
-- `OrbitTopBar` — Standard back navigation bar with optional subtitle and trailing actions.
-- `OrbitEmptyState` — Centered empty state featuring bundled `img_empty_state` illustration and optional CTA `OrbitPrimaryButton`.
-- `OrbitSectionHeader` — Consistent section title styled in primary accent.
-- `OrbitSurfaceCard` — Tonal card with hairline border and optional click ripple.
-- `OrbitSettingSwitchRow` — Icon + title + subtitle + M3 `Switch` row for settings.
-- `OrbitBadgeChip` — Compact pill badge for folder tags, encryption labels, and status pills.
-- `OrbitFilterField` — Standard `OrbitTextField`-backed search/filter bar with clear button.
+## 5. Centralized Reusable UI Components (`core/ui/components/`)
+Always reuse these centralized primitives instead of raw Material controls in `feature/*`:
+- **`OrbitControls.kt`:** `OrbitControlTokens`, `OrbitSurfacePalette`, `rememberOrbitSurfacePalette()`, `OrbitPrimaryButton`, `OrbitSecondaryButton`, `OrbitGhostButton`, `OrbitFloatingActionButton`, `OrbitExtendedFloatingActionButton`, `OrbitTextField`, `OrbitSearchPillSurface`.
+- **`OrbitPills.kt`:** `OrbitSegmentPill`, `OrbitActionPill`, `OrbitBadgeChip`, `OrbitSheetStatusPill`.
+- **`OrbitSelectionControls.kt`:** `OrbitSwitch`, `OrbitCompactSwitchTile`, `OrbitSettingSwitchRow`, `OrbitCheckboxRow`, `OrbitRadioOptionRow`, `OrbitSlider`.
+- **`OrbitCards.kt`:** `OrbitSectionHeader`, `OrbitSurfaceCard`, `OrbitSelectableOptionCard`, `OrbitNoticeBanner`.
+- **`OrbitBottomSheet.kt` & `OrbitBottomSheetItems.kt`:** `OrbitModalBottomSheet`, `OrbitSheetHeader`, `OrbitSheetKicker`, `OrbitSheetPanel`, `OrbitSheetSegmentPill`, `OrbitSheetPagerTabs`, `OrbitSheetHairlineDivider`, `OrbitSheetPrimaryButton`, `OrbitSheetSecondaryButton`, `OrbitSheetBentoTile` (borderless `38.dp` `CircleShape` icon well), `OrbitSheetActionRow`, `OrbitSheetSwitchRow`.
+- **`OrbitPopupMenu.kt`:** `OrbitPopupMenu`, `OrbitPopupMenuItem` (circular `28.dp` icon well), `OrbitPopupMenuDivider`.
+- **`OrbitDialog.kt`:** `OrbitDialog`, `OrbitConfirmDialog`.
+- **`OrbitCommonComponents.kt`:** `OrbitTopBar`, `OrbitEmptyState`, `OrbitFilterField`.
 
 ---
 
 ## 6. Visual Assets (`res/drawable/` & `res/mipmap-*`)
 - **Launcher Icon:** Adaptive icon (`#07152F` background + centered Orbit orbital compass foreground) with raster PNG fallbacks across `mdpi`–`xxxhdpi`.
-- **Start Page Hero:** `img_home_hero_1795536368553.jpg` (`16:9`) rendered with a vertical slate scrim for crisp text legibility.
+- **Start Page Hero:** `img_home_hero_1795536368553.jpg` (`16:9`) rendered with semantic wallpaper scrim tokens.
 - **Empty State Artwork:** `img_empty_state_1795536369734.jpg` (`4:3`) used across empty Bookmarks, History, Downloads, and Privacy Vault views.

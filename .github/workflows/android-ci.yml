@@ -6,14 +6,25 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: write
+
 jobs:
   android-build-and-test:
-    name: Gradle Test, Lint & Debug APK
+    name: Gradle Test, Lint & APK Build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Read App Version
+        run: |
+          VERSION_NAME=$(awk -F'"' '/versionName[[:space:]]*=/{print $2; exit}' app/build.gradle.kts)
+          VERSION_CODE=$(awk -F'=' '/versionCode[[:space:]]*=/{gsub(/[^0-9]/, "", $2); print $2; exit}' app/build.gradle.kts)
+          echo "VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=${VERSION_CODE}" >> "$GITHUB_ENV"
+          echo "Detected Orbit Browser v${VERSION_NAME} (Build ${VERSION_CODE})"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -69,12 +80,43 @@ jobs:
           else
             gradle :app:assembleDebug --no-daemon
           fi
+          mkdir -p dist-apks
+          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          cp "$DEBUG_APK" "dist-apks/orbit-browser-v${VERSION_NAME}-debug.apk"
 
-      - name: Upload Debug APK
+      - name: Build Signed Universal Release APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
+            export KEYSTORE_PATH="${RUNNER_TEMP}/my-upload-key.jks"
+            printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$KEYSTORE_PATH"
+            if [ -x ./gradlew ]; then
+              ./gradlew :app:assembleRelease --no-daemon
+            else
+              gradle :app:assembleRelease --no-daemon
+            fi
+            RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+            cp "$RELEASE_APK" "dist-apks/orbit-browser-v${VERSION_NAME}-universal-release.apk"
+          else
+            echo "::warning::Release signing secrets (KEYSTORE_BASE64, STORE_PASSWORD, KEY_PASSWORD) are not configured; skipping signed release APK."
+            if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+              echo "::error::Cannot publish production universal release APK without KEYSTORE_BASE64, STORE_PASSWORD, and KEY_PASSWORD secrets."
+              exit 1
+            fi
+          fi
+
+      - name: Clean Up Release Keystore
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/my-upload-key.jks"
+
+      - name: Upload Versioned APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: orbit-browser-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: orbit-browser-v${{ env.VERSION_NAME }}-apks
+          path: dist-apks/*.apk
           retention-days: 14
 
   # Optional job when building native Brave adblock-rust (.so) via cargo-ndk
@@ -93,3 +135,46 @@ jobs:
         if: hashFiles('native/adblock-rust/Cargo.toml') != ''
         working-directory: native/adblock-rust
         run: cargo check
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [ android-build-and-test, rust-adblock-check ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read App Version
+        run: |
+          VERSION_NAME=$(awk -F'"' '/versionName[[:space:]]*=/{print $2; exit}' app/build.gradle.kts)
+          VERSION_CODE=$(awk -F'=' '/versionCode[[:space:]]*=/{gsub(/[^0-9]/, "", $2); print $2; exit}' app/build.gradle.kts)
+          echo "VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=${VERSION_CODE}" >> "$GITHUB_ENV"
+
+      - name: Download Built APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: orbit-browser-v${{ env.VERSION_NAME }}-apks
+          path: dist-apks
+
+      - name: Create or Update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${VERSION_NAME}"
+          NOTES="Automated Orbit Browser ${TAG} (Build ${VERSION_CODE}) release from commit ${GITHUB_SHA::7}."
+          PRERELEASE_FLAG=""
+          if echo "$VERSION_NAME" | grep -qiE "alpha|beta|rc"; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist-apks/*.apk --clobber
+            gh release edit "$TAG" --title "Orbit Browser ${TAG}" --notes "$NOTES"
+          else
+            gh release create "$TAG" dist-apks/*.apk \
+              --title "Orbit Browser ${TAG}" \
+              --notes "$NOTES" \
+              --target "$GITHUB_SHA" \
+              $PRERELEASE_FLAG
+          fi

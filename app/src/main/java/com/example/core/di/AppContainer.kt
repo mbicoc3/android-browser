@@ -17,6 +17,8 @@ import com.example.feature.bookmarks.viewmodel.BookmarksViewModel
 import com.example.feature.browser.repository.BrowserRepository
 import com.example.feature.browser.viewmodel.BrowserViewModel
 import com.example.feature.browser.webview.OrbitWebViewPool
+import com.example.feature.collections.repository.ImageCollectionRepository
+import com.example.feature.collections.viewmodel.ImageCollectionsViewModel
 import com.example.feature.downloads.repository.DownloadRepository
 import com.example.feature.downloads.viewmodel.DownloadsViewModel
 import com.example.feature.history.repository.HistoryRepository
@@ -82,6 +84,9 @@ class AppContainer(context: Context) {
 
     val bookmarkRepository: BookmarkRepository by lazy {
         BookmarkRepository(database.bookmarkDao())
+    }
+    val imageCollectionRepository: ImageCollectionRepository by lazy {
+        ImageCollectionRepository(database.imageCollectionDao())
     }
     val historyRepository: HistoryRepository by lazy {
         HistoryRepository(database.historyDao())
@@ -183,6 +188,10 @@ class AppContainer(context: Context) {
 
     fun bookmarksViewModelFactory(): ViewModelProvider.Factory = factory {
         BookmarksViewModel(bookmarkRepository)
+    }
+
+    fun imageCollectionsViewModelFactory(): ViewModelProvider.Factory = factory {
+        ImageCollectionsViewModel(imageCollectionRepository)
     }
 
     fun historyViewModelFactory(): ViewModelProvider.Factory = factory {
